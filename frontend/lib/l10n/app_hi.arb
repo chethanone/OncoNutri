@@ -1,0 +1,20 @@
+{
+  "appName": "OncoNutri+",
+  "welcome": "OncoNutri+ में आपका स्वागत है",
+  "login": "लॉग इन करें",
+  "signup": "साइन अप करें",
+  "email": "ईमेल",
+  "password": "पासवर्ड",
+  "forgotPassword": "पासवर्ड भूल गए?",
+  "dontHaveAccount": "खाता नहीं है? साइन अप करें",
+  "alreadyHaveAccount": "पहले से खाता है? लॉग इन करें",
+  "patientProfile": "रोगी प्रोफ़ाइल",
+  "dietRecommendations": "आहार सिफारिशें",
+  "progressHistory": "प्रगति इतिहास",
+  "logout": "लॉग आउट",
+  "save": "सहेजें",
+  "cancel": "रद्द करें",
+  "loading": "लोड हो रहा है...",
+  "error": "त्रुटि",
+  "success": "सफलता"
+}

@@ -1,0 +1,131 @@
+OncoNutri+ Project Structure & Tech Plan
+
+---
+1. Frontend (Flutter Mobile App)
+Key Features:
+- Clean UI inspired by Tata 1mg (customized)
+- Patient Profile + Personalized Diet Recommendations (ML integration)
+- Multilingual support using Flutter Intl package
+- Push notifications / reminders (Flutter Local Notifications)
+- Diet history & progress tracking
+- Hybrid offline mode (cache profile + basic recommendations)
+
+Suggested Folder Structure:
+lib/
+ ├─ main.dart
+ ├─ routes/                  # App routes
+ ├─ screens/                 # All screens
+ │   ├─ splash_screen.dart
+ │   ├─ login_screen.dart
+ │   ├─ signup_screen.dart
+ │   ├─ patient_profile_screen.dart
+ │   ├─ diet_recommendation_screen.dart
+ │   └─ progress_history_screen.dart
+ ├─ widgets/                 # Reusable UI components
+ ├─ models/                  # Data models (User, Diet, etc.)
+ ├─ services/                # API services, notifications, caching
+ ├─ utils/                   # Helper functions, constants
+ └─ l10n/                    # Intl translation files
+
+Packages / Plugins:
+- flutter_local_notifications
+- flutter_intl
+- http / dio (API calls)
+- provider / riverpod (state management)
+- sqflite / hive (offline cache)
+
+---
+2. Backend
+Architecture: Hybrid
+- Node.js + Express: Handles API routing, PostgreSQL DB, authentication, user management
+- FastAPI (Python): Handles ML model requests and recommendations
+
+Suggested Folder Structure:
+backend/
+ ├─ node_server/
+ │   ├─ app.js               # Entry point
+ │   ├─ routes/              # API routes
+ │   │   ├─ authRoutes.js
+ │   │   ├─ userRoutes.js
+ │   │   └─ dietRoutes.js
+ │   ├─ controllers/         # Request handlers
+ │   ├─ models/              # Sequelize models (PostgreSQL)
+ │   └─ utils/               # JWT auth, validation, logger
+ └─ fastapi_ml/
+     ├─ main.py              # FastAPI entry point
+     ├─ models/              # ML model scripts
+     ├─ utils/               # Preprocessing, helper functions
+     └─ requirements.txt     # Python dependencies
+
+Backend Features:
+- Custom authentication (Node.js + PostgreSQL)
+- REST API endpoints for frontend
+- Full logging and analytics
+- Diet recommendation ML endpoints via FastAPI
+- Periodic retraining / feedback loop support
+
+---
+3. Database (PostgreSQL)
+Key Tables:
+users (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR,
+  email VARCHAR UNIQUE,
+  password_hash VARCHAR,
+  language_preference VARCHAR,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
+)
+
+patient_profiles (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES users(id),
+  age INT,
+  weight FLOAT,
+  cancer_type VARCHAR,
+  stage VARCHAR,
+  allergies TEXT,
+  other_conditions TEXT,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
+)
+
+diet_recommendations (
+  id SERIAL PRIMARY KEY,
+  patient_id INT REFERENCES patient_profiles(id),
+  recommendation JSONB,
+  created_at TIMESTAMP
+)
+
+progress_history (
+  id SERIAL PRIMARY KEY,
+  patient_id INT REFERENCES patient_profiles(id),
+  date DATE,
+  adherence_score INT,
+  notes TEXT
+)
+
+analytics_logs (
+  id SERIAL PRIMARY KEY,
+  patient_id INT REFERENCES patient_profiles(id),
+  action VARCHAR,
+  timestamp TIMESTAMP
+)
+
+Notes:
+- All sensitive info stored securely
+- PostgreSQL supports JSONB for ML recommendation outputs
+
+---
+4. Deployment & Hosting
+- Backend: Cloud hosting (AWS / GCP / Azure)
+- Frontend: Mobile App (Flutter), publish to Play Store / App Store
+- ML model: Served on FastAPI backend
+- Offline support: Flutter Local Notifications + caching
+
+---
+5. ML Model
+- Server-side ML (FastAPI)
+- Dataset: Public datasets (Kaggle, UCI) + optional crowdsourced patient data
+- Features: Cancer type, stage, weight, allergies, symptoms → Personalized diet plan
+- Retraining: Periodic on backend with new anonymized data + optional expert review

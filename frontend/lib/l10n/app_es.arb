@@ -1,0 +1,20 @@
+{
+  "appName": "OncoNutri+",
+  "welcome": "Bienvenido a OncoNutri+",
+  "login": "Iniciar sesión",
+  "signup": "Registrarse",
+  "email": "Correo electrónico",
+  "password": "Contraseña",
+  "forgotPassword": "¿Olvidaste tu contraseña?",
+  "dontHaveAccount": "¿No tienes una cuenta? Regístrate",
+  "alreadyHaveAccount": "¿Ya tienes una cuenta? Inicia sesión",
+  "patientProfile": "Perfil del Paciente",
+  "dietRecommendations": "Recomendaciones Dietéticas",
+  "progressHistory": "Historial de Progreso",
+  "logout": "Cerrar sesión",
+  "save": "Guardar",
+  "cancel": "Cancelar",
+  "loading": "Cargando...",
+  "error": "Error",
+  "success": "Éxito"
+}

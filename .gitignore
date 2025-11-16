@@ -1,0 +1,42 @@
+# OncoNutri+ Project Root .gitignore
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Build outputs
+dist/
+build/
+*.zip
+*.tar.gz
+
+# Database backups
+*.sql.backup
+backup_*.sql
+
+# Secrets
+*.pem
+*.key
+secrets/

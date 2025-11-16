@@ -1,0 +1,50 @@
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+LICENSE
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# Environment
+.env
+.env.local
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Tests
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Models (if large)
+# models/*.pkl
+# models/*.h5
+
+# Data
+data/
+*.csv
+*.xlsx
