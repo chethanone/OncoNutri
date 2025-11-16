@@ -17,7 +17,7 @@
 ### 3. Python Environment
 - **Status**: ✅ Ready
 - **Version**: 3.13.3
-- **Dependencies**: ⚠️ Partially installed (needs completion)
+- **Dependencies**: ✅ Installed (fastapi, uvicorn, pandas, numpy, scikit-learn)
 - **Location**: backend/fastapi_ml/
 
 ### 4. Git Repository
@@ -29,27 +29,27 @@
 
 ## ⚠️ Pending Tasks
 
-### 1. Complete Python Dependencies
-Run this command to finish installing ML service dependencies:
+### 1. Install PostgreSQL
+**Easy Setup:** Run the automated setup script:
 ```powershell
-cd "c:\OncoNutri+\backend\fastapi_ml"
-python -m pip install -r requirements.txt
+cd "c:\OncoNutri+"
+.\setup-postgresql.ps1
 ```
 
-### 2. Install PostgreSQL
+This script will:
+- Guide you to download PostgreSQL if not installed
+- Create the 'onconutri' database
+- Run all schema migrations
+- Generate .env file with your credentials
+- Load sample data (optional)
+
+**Manual Installation:**
 1. Download from: https://www.postgresql.org/download/windows/
 2. Install with default settings
 3. Set password for postgres user
-4. Create database:
-   ```sql
-   CREATE DATABASE onconutri;
-   ```
-5. Run schema:
-   ```powershell
-   psql -U postgres -d onconutri -f "c:\OncoNutri+\backend\database\schema.sql"
-   ```
+4. Run the setup script above
 
-### 3. Configure Backend Environment
+### 2. Configure Backend Environment (Auto-configured by setup script)
 1. Copy `.env.example` to `.env`:
    ```powershell
    cd "c:\OncoNutri+\backend\node_server"
@@ -111,10 +111,12 @@ flutter run -d windows
 
 ## 📋 Development Checklist
 
-- [x] Flutter SDK installed
-- [x] Flutter dependencies installed
-- [x] Node.js backend dependencies installed
-- [ ] Python ML dependencies fully installed
+- [x] Flutter SDK installed (v3.24.5)
+- [x] Flutter dependencies installed (100 packages)
+- [x] Node.js backend dependencies installed (464 packages)
+- [x] Python ML dependencies installed (fastapi, uvicorn, pandas, numpy, scikit-learn)
+- [x] Logs directory created for ML service
+- [x] Setup scripts created (start-services.ps1, setup-postgresql.ps1)
 - [ ] PostgreSQL installed
 - [ ] Database schema created
 - [ ] Backend .env configured
