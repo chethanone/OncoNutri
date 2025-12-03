@@ -68,6 +68,11 @@ backup_*.sql
 *.sqlite
 *.sqlite3
 
+# Large dataset files (use Git LFS or external storage)
+backend/datasets/nutrition_data/
+backend/datasets/cancer_data/cancer_patients.csv
+backend/datasets/cancer_data/comprehensive_food_database.csv
+
 # Secrets and credentials - CRITICAL
 *.pem
 *.key
