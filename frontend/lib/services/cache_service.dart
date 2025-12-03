@@ -44,6 +44,12 @@ class CacheService {
     return null;
   }
 
+  // Get patient ID for ML service
+  Future<String> getPatientId() async {
+    final profile = await getPatientProfile();
+    return profile?.id.toString() ?? 'unknown';
+  }
+
   Future<void> saveDietRecommendation(DietRecommendation recommendation) async {
     final prefs = await SharedPreferences.getInstance();
     final jsonString = jsonEncode(recommendation.toJson());
@@ -66,3 +72,4 @@ class CacheService {
     await prefs.clear();
   }
 }
+

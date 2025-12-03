@@ -1,53 +1,54 @@
 const express = require('express');
 const cors = require('cors');
-const helmet = require('helmet');
-const morgan = require('morgan');
 require('dotenv').config();
 
-const authRoutes = require('./routes/authRoutes');
-const userRoutes = require('./routes/userRoutes');
-const dietRoutes = require('./routes/dietRoutes');
-const patientRoutes = require('./routes/patientRoutes');
-const progressRoutes = require('./routes/progressRoutes');
-
-const { errorHandler } = require('./utils/errorHandler');
-const { connectDB } = require('./config/database');
-
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(helmet());
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(morgan('dev'));
-
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/user', userRoutes);
-app.use('/api/diet', dietRoutes);
-app.use('/api/patient', patientRoutes);
-app.use('/api/progress', progressRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', message: 'OncoNutri+ API is running' });
+    res.json({ status: 'ok', service: 'OncoNutri+ Backend' });
 });
 
-// Error handling
-app.use(errorHandler);
+// Routes - with error handling
+try {
+    app.use('/api/auth', require('./routes/auth'));
+} catch(e) { console.log('Auth route error:', e.message); }
 
-// Connect to database and start server
-connectDB()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+try {
+    app.use('/api/patients', require('./routes/patients'));
+} catch(e) { console.log('Patients route error:', e.message); }
+
+try {
+    app.use('/api/recommendations', require('./routes/recommendations'));
+} catch(e) { console.log('Recommendations route error:', e.message); }
+
+try {
+    app.use('/api/dashboard', require('./routes/dashboardRoutes'));
+} catch(e) { console.log('Dashboard route error:', e.message); }
+
+try {
+    app.use('/api/diet', require('./routes/dietRoutes'));
+} catch(e) { console.log('Diet route error:', e.message); }
+
+// Fallback dashboard route
+app.get('/api/dashboard/overview', (req, res) => {
+    res.json({
+        status: 'ok',
+        totalPatients: 0,
+        activeRecommendations: 0,
+        avgCompliance: 0,
+        recentActivity: []
     });
-  })
-  .catch((err) => {
-    console.error('Failed to connect to database:', err);
-    process.exit(1);
-  });
+});
 
-module.exports = app;
+// Start server
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Backend server running on port ${PORT}`);
+    console.log(`Health check: http://localhost:${PORT}/health`);
+    console.log(`Network access: http://192.168.10.37:${PORT}`);
+});

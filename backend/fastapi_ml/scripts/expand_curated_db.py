@@ -1,0 +1,216 @@
+import json
+import os
+
+def expand_database():
+    """
+    Expand the curated food database with a comprehensive list of safe, compliant foods.
+    """
+    
+    # Define the expanded dataset
+    # STRICT COMPLIANCE RULES:
+    # Vegan: No animal products (dairy, egg, meat, honey)
+    # Jain: No onion, garlic, root vegetables (potato, carrot, etc.), meat, egg
+    # Pure Veg: No meat, egg, fish
+    
+    expanded_data = {
+        "pure_veg": [
+            # Existing + New Indian & International Vegetarian
+            {"name": "Dal Makhani", "meal_type": "dinner", "cuisine": "Indian", "calories": 320, "protein": 12, "carbs": 35, "fiber": 8, "preparation": "Black lentils cooked with butter and cream", "cancer_benefits": "High protein and fiber"},
+            {"name": "Aloo Gobi", "meal_type": "lunch", "cuisine": "Indian", "calories": 180, "protein": 4, "carbs": 28, "fiber": 6, "preparation": "Potatoes and cauliflower cooked with turmeric", "cancer_benefits": "Cruciferous vegetables fight cancer"},
+            {"name": "Vegetable Korma", "meal_type": "dinner", "cuisine": "Indian", "calories": 240, "protein": 6, "carbs": 22, "fiber": 5, "preparation": "Mixed vegetables in coconut cashew gravy", "cancer_benefits": "Healthy fats and vitamins"},
+            {"name": "Baingan Bharta", "meal_type": "dinner", "cuisine": "Indian", "calories": 140, "protein": 3, "carbs": 18, "fiber": 7, "preparation": "Roasted eggplant mashed with spices", "cancer_benefits": "High antioxidants"},
+            {"name": "Matar Paneer", "meal_type": "lunch", "cuisine": "Indian", "calories": 280, "protein": 14, "carbs": 20, "fiber": 5, "preparation": "Peas and cottage cheese in tomato gravy", "cancer_benefits": "Protein rich"},
+            {"name": "Greek Salad", "meal_type": "lunch", "cuisine": "Mediterranean", "calories": 220, "protein": 8, "carbs": 12, "fiber": 4, "preparation": "Cucumber, tomato, olives, feta cheese", "cancer_benefits": "Antioxidants and healthy fats"},
+            {"name": "Caprese Salad", "meal_type": "snack", "cuisine": "Italian", "calories": 260, "protein": 12, "carbs": 4, "fiber": 1, "preparation": "Fresh mozzarella, tomatoes, basil", "cancer_benefits": "Calcium and lycopene"},
+            {"name": "Vegetable Lasagna", "meal_type": "dinner", "cuisine": "Italian", "calories": 350, "protein": 15, "carbs": 45, "fiber": 6, "preparation": "Layered pasta with vegetables and cheese", "cancer_benefits": "Comfort food with veggies"},
+            {"name": "Spinach Ravioli", "meal_type": "dinner", "cuisine": "Italian", "calories": 310, "protein": 10, "carbs": 42, "fiber": 4, "preparation": "Pasta stuffed with spinach and ricotta", "cancer_benefits": "Iron and calcium"},
+            {"name": "Mushroom Risotto", "meal_type": "dinner", "cuisine": "Italian", "calories": 380, "protein": 8, "carbs": 55, "fiber": 3, "preparation": "Creamy rice with mushrooms", "cancer_benefits": "Selenium from mushrooms"},
+            {"name": "Vegetable Stir Fry", "meal_type": "lunch", "cuisine": "Asian", "calories": 200, "protein": 6, "carbs": 25, "fiber": 6, "preparation": "Mixed veggies wok-tossed with soy sauce", "cancer_benefits": "Vitamin rich"},
+            {"name": "Paneer Butter Masala", "meal_type": "dinner", "cuisine": "Indian", "calories": 340, "protein": 14, "carbs": 18, "fiber": 2, "preparation": "Paneer in rich tomato butter gravy", "cancer_benefits": "High calorie for weight gain"},
+            {"name": "Malai Kofta", "meal_type": "dinner", "cuisine": "Indian", "calories": 360, "protein": 10, "carbs": 32, "fiber": 4, "preparation": "Fried potato-paneer balls in creamy gravy", "cancer_benefits": "Energy dense"},
+            {"name": "Rajma Chawal", "meal_type": "lunch", "cuisine": "Indian", "calories": 380, "protein": 14, "carbs": 60, "fiber": 12, "preparation": "Kidney beans curry with rice", "cancer_benefits": "Complete protein"},
+            {"name": "Chole Bhature", "meal_type": "lunch", "cuisine": "Indian", "calories": 450, "protein": 16, "carbs": 65, "fiber": 10, "preparation": "Spiced chickpeas with fried bread", "cancer_benefits": "High energy"},
+            {"name": "Pav Bhaji", "meal_type": "snack", "cuisine": "Indian", "calories": 300, "protein": 8, "carbs": 45, "fiber": 8, "preparation": "Mashed vegetable curry with buttered bread", "cancer_benefits": "Hidden vegetables"},
+            {"name": "Vegetable Pulao", "meal_type": "lunch", "cuisine": "Indian", "calories": 260, "protein": 6, "carbs": 48, "fiber": 5, "preparation": "Rice cooked with mixed vegetables", "cancer_benefits": "Easy to digest"},
+            {"name": "Curd Rice", "meal_type": "lunch", "cuisine": "South Indian", "calories": 220, "protein": 6, "carbs": 35, "fiber": 2, "preparation": "Rice mixed with yogurt and tempering", "cancer_benefits": "Probiotic and cooling"},
+            {"name": "Idli Sambar", "meal_type": "breakfast", "cuisine": "South Indian", "calories": 180, "protein": 8, "carbs": 38, "fiber": 6, "preparation": "Steamed rice cakes with lentil soup", "cancer_benefits": "Fermented and easy to digest"},
+            {"name": "Masala Dosa", "meal_type": "breakfast", "cuisine": "South Indian", "calories": 320, "protein": 6, "carbs": 52, "fiber": 4, "preparation": "Rice crepe filled with spiced potatoes", "cancer_benefits": "Gluten free option"},
+            {"name": "Upma", "meal_type": "breakfast", "cuisine": "South Indian", "calories": 240, "protein": 6, "carbs": 42, "fiber": 4, "preparation": "Semolina porridge with veggies", "cancer_benefits": "Quick energy"},
+            {"name": "Poha", "meal_type": "breakfast", "cuisine": "Indian", "calories": 260, "protein": 5, "carbs": 48, "fiber": 3, "preparation": "Flattened rice with peanuts and turmeric", "cancer_benefits": "Iron rich"},
+            {"name": "Dhokla", "meal_type": "snack", "cuisine": "Gujarati", "calories": 160, "protein": 6, "carbs": 24, "fiber": 2, "preparation": "Steamed gram flour cake", "cancer_benefits": "Fermented and light"},
+            {"name": "Khandvi", "meal_type": "snack", "cuisine": "Gujarati", "calories": 180, "protein": 8, "carbs": 20, "fiber": 3, "preparation": "Gram flour rolls with coconut", "cancer_benefits": "Gluten free snack"},
+            {"name": "Thepla", "meal_type": "breakfast", "cuisine": "Gujarati", "calories": 220, "protein": 6, "carbs": 32, "fiber": 4, "preparation": "Spiced flatbread with fenugreek leaves", "cancer_benefits": "Iron and fiber"},
+            {"name": "Gajar Halwa", "meal_type": "snack", "cuisine": "Indian", "calories": 280, "protein": 4, "carbs": 45, "fiber": 3, "preparation": "Carrot pudding with milk and nuts", "cancer_benefits": "Beta carotene"},
+            {"name": "Rice Kheer", "meal_type": "snack", "cuisine": "Indian", "calories": 260, "protein": 6, "carbs": 42, "fiber": 1, "preparation": "Rice pudding with cardamom", "cancer_benefits": "Comfort food"},
+            {"name": "Mango Lassi", "meal_type": "snack", "cuisine": "Indian", "calories": 240, "protein": 8, "carbs": 35, "fiber": 1, "preparation": "Yogurt drink with mango pulp", "cancer_benefits": "Probiotic and vitamin C"},
+            {"name": "Buttermilk (Chaas)", "meal_type": "snack", "cuisine": "Indian", "calories": 60, "protein": 3, "carbs": 5, "fiber": 0, "preparation": "Diluted yogurt with spices", "cancer_benefits": "Hydrating and digestive"},
+            {"name": "Vegetable Soup", "meal_type": "dinner", "cuisine": "International", "calories": 120, "protein": 4, "carbs": 20, "fiber": 4, "preparation": "Mixed vegetable broth", "cancer_benefits": "Hydrating"},
+            {"name": "Tomato Soup", "meal_type": "dinner", "cuisine": "International", "calories": 140, "protein": 2, "carbs": 24, "fiber": 3, "preparation": "Creamy tomato soup", "cancer_benefits": "Lycopene"},
+            {"name": "Corn Soup", "meal_type": "dinner", "cuisine": "Asian", "calories": 160, "protein": 3, "carbs": 28, "fiber": 2, "preparation": "Sweet corn soup", "cancer_benefits": "Easy to swallow"},
+            {"name": "Lentil Soup", "meal_type": "dinner", "cuisine": "International", "calories": 220, "protein": 12, "carbs": 30, "fiber": 8, "preparation": "Thick lentil stew", "cancer_benefits": "High protein"},
+            {"name": "Minestrone Soup", "meal_type": "dinner", "cuisine": "Italian", "calories": 240, "protein": 8, "carbs": 35, "fiber": 6, "preparation": "Tomato broth with pasta and beans", "cancer_benefits": "Complete meal in a bowl"}
+        ],
+        "vegan": [
+            # Strictly Plant Based
+            {"name": "Tofu Tikka Masala", "meal_type": "dinner", "cuisine": "Indian", "calories": 280, "protein": 16, "carbs": 18, "fiber": 4, "preparation": "Tofu in spiced tomato gravy with coconut milk", "cancer_benefits": "Soy protein"},
+            {"name": "Chickpea Curry (Chana Masala)", "meal_type": "lunch", "cuisine": "Indian", "calories": 260, "protein": 12, "carbs": 40, "fiber": 10, "preparation": "Chickpeas in tomato onion gravy", "cancer_benefits": "High fiber"},
+            {"name": "Lentil Dal", "meal_type": "dinner", "cuisine": "Indian", "calories": 200, "protein": 10, "carbs": 30, "fiber": 8, "preparation": "Yellow lentils with cumin and garlic", "cancer_benefits": "Plant protein"},
+            {"name": "Aloo Matar", "meal_type": "lunch", "cuisine": "Indian", "calories": 220, "protein": 6, "carbs": 35, "fiber": 6, "preparation": "Potatoes and peas curry", "cancer_benefits": "Vitamin C and fiber"},
+            {"name": "Vegetable Biryani (Vegan)", "meal_type": "lunch", "cuisine": "Indian", "calories": 300, "protein": 8, "carbs": 55, "fiber": 6, "preparation": "Spiced rice with vegetables", "cancer_benefits": "Complex carbs"},
+            {"name": "Sambar", "meal_type": "dinner", "cuisine": "South Indian", "calories": 160, "protein": 6, "carbs": 28, "fiber": 6, "preparation": "Lentil and vegetable stew with tamarind", "cancer_benefits": "Digestive spices"},
+            {"name": "Coconut Vegetable Curry", "meal_type": "dinner", "cuisine": "Thai", "calories": 320, "protein": 6, "carbs": 24, "fiber": 5, "preparation": "Mixed veggies in coconut milk curry", "cancer_benefits": "Healthy fats"},
+            {"name": "Vegan Pad Thai", "meal_type": "lunch", "cuisine": "Thai", "calories": 380, "protein": 12, "carbs": 60, "fiber": 4, "preparation": "Rice noodles with tofu and peanuts", "cancer_benefits": "Energy dense"},
+            {"name": "Quinoa Salad", "meal_type": "lunch", "cuisine": "International", "calories": 280, "protein": 10, "carbs": 45, "fiber": 6, "preparation": "Quinoa with cucumber, tomato, lemon", "cancer_benefits": "Complete protein"},
+            {"name": "Hummus Wrap", "meal_type": "lunch", "cuisine": "Mediterranean", "calories": 340, "protein": 12, "carbs": 48, "fiber": 8, "preparation": "Hummus and veggies in whole wheat wrap", "cancer_benefits": "Fiber rich"},
+            {"name": "Falafel Plate", "meal_type": "dinner", "cuisine": "Mediterranean", "calories": 400, "protein": 14, "carbs": 50, "fiber": 10, "preparation": "Chickpea patties with tahini", "cancer_benefits": "Plant protein"},
+            {"name": "Avocado Toast", "meal_type": "breakfast", "cuisine": "International", "calories": 260, "protein": 6, "carbs": 28, "fiber": 8, "preparation": "Mashed avocado on whole grain toast", "cancer_benefits": "Healthy monounsaturated fats"},
+            {"name": "Oatmeal with Berries", "meal_type": "breakfast", "cuisine": "International", "calories": 220, "protein": 6, "carbs": 40, "fiber": 6, "preparation": "Oats cooked in water/almond milk with fruit", "cancer_benefits": "Beta-glucan fiber"},
+            {"name": "Chia Pudding", "meal_type": "breakfast", "cuisine": "International", "calories": 240, "protein": 8, "carbs": 20, "fiber": 10, "preparation": "Chia seeds soaked in coconut milk", "cancer_benefits": "Omega-3 fatty acids"},
+            {"name": "Smoothie Bowl", "meal_type": "breakfast", "cuisine": "International", "calories": 280, "protein": 6, "carbs": 50, "fiber": 8, "preparation": "Blended fruit topped with granola", "cancer_benefits": "Antioxidants"},
+            {"name": "Peanut Butter Banana Toast", "meal_type": "snack", "cuisine": "International", "calories": 300, "protein": 10, "carbs": 35, "fiber": 5, "preparation": "Peanut butter and banana on toast", "cancer_benefits": "Energy boost"},
+            {"name": "Roasted Chickpeas", "meal_type": "snack", "cuisine": "International", "calories": 180, "protein": 8, "carbs": 25, "fiber": 6, "preparation": "Crispy baked chickpeas", "cancer_benefits": "Crunchy protein snack"},
+            {"name": "Fruit Salad", "meal_type": "snack", "cuisine": "International", "calories": 140, "protein": 2, "carbs": 35, "fiber": 4, "preparation": "Mixed seasonal fruits", "cancer_benefits": "Vitamins and hydration"},
+            {"name": "Vegetable Sushi Rolls", "meal_type": "lunch", "cuisine": "Japanese", "calories": 260, "protein": 6, "carbs": 50, "fiber": 4, "preparation": "Avocado and cucumber sushi", "cancer_benefits": "Light and digestible"},
+            {"name": "Miso Soup", "meal_type": "snack", "cuisine": "Japanese", "calories": 80, "protein": 4, "carbs": 10, "fiber": 1, "preparation": "Soybean paste soup with tofu", "cancer_benefits": "Fermented soy benefits"},
+            {"name": "Edamame", "meal_type": "snack", "cuisine": "Japanese", "calories": 120, "protein": 10, "carbs": 10, "fiber": 4, "preparation": "Steamed soybeans", "cancer_benefits": "High protein snack"},
+            {"name": "Vegan Burger", "meal_type": "dinner", "cuisine": "International", "calories": 380, "protein": 18, "carbs": 45, "fiber": 8, "preparation": "Bean or lentil patty on bun", "cancer_benefits": "Plant based comfort food"},
+            {"name": "Stuffed Bell Peppers", "meal_type": "dinner", "cuisine": "International", "calories": 280, "protein": 8, "carbs": 35, "fiber": 6, "preparation": "Peppers stuffed with rice and beans", "cancer_benefits": "Vitamin C"},
+            {"name": "Ratatouille", "meal_type": "dinner", "cuisine": "French", "calories": 200, "protein": 4, "carbs": 25, "fiber": 6, "preparation": "Stewed summer vegetables", "cancer_benefits": "Nutrient dense"},
+            {"name": "Gazpacho", "meal_type": "snack", "cuisine": "Spanish", "calories": 120, "protein": 2, "carbs": 18, "fiber": 3, "preparation": "Cold tomato vegetable soup", "cancer_benefits": "Hydrating and cooling"},
+            {"name": "Vegan Pancakes", "meal_type": "breakfast", "cuisine": "International", "calories": 280, "protein": 6, "carbs": 50, "fiber": 2, "preparation": "Fluffy pancakes made with plant milk", "cancer_benefits": "Comfort breakfast"},
+            {"name": "Scrambled Tofu", "meal_type": "breakfast", "cuisine": "International", "calories": 220, "protein": 14, "carbs": 8, "fiber": 2, "preparation": "Tofu crumbled with turmeric and veggies", "cancer_benefits": "Egg alternative"},
+            {"name": "Vegan Mac and Cheese", "meal_type": "dinner", "cuisine": "International", "calories": 360, "protein": 10, "carbs": 55, "fiber": 4, "preparation": "Pasta with cashew/potato cheese sauce", "cancer_benefits": "Dairy free comfort"},
+            {"name": "Mushroom Stroganoff", "meal_type": "dinner", "cuisine": "International", "calories": 320, "protein": 8, "carbs": 40, "fiber": 5, "preparation": "Mushrooms in creamy coconut sauce", "cancer_benefits": "Savory and rich"},
+            {"name": "Pumpkin Soup", "meal_type": "dinner", "cuisine": "International", "calories": 160, "protein": 3, "carbs": 28, "fiber": 4, "preparation": "Creamy blended pumpkin soup", "cancer_benefits": "Beta carotene"}
+        ],
+        "jain": [
+            # STRICT: No Onion, No Garlic, No Root Veg (Potato, Carrot, Ginger, etc.)
+            {"name": "Paneer Makhani (Jain)", "meal_type": "dinner", "cuisine": "Indian", "calories": 340, "protein": 14, "carbs": 18, "fiber": 2, "preparation": "Paneer in tomato cream gravy without onion/garlic", "cancer_benefits": "High calorie"},
+            {"name": "Dal Fry (Jain)", "meal_type": "lunch", "cuisine": "Indian", "calories": 220, "protein": 10, "carbs": 32, "fiber": 6, "preparation": "Yellow lentils tempered with cumin and tomato", "cancer_benefits": "Protein rich"},
+            {"name": "Gatta Curry (Jain)", "meal_type": "dinner", "cuisine": "Indian", "calories": 280, "protein": 12, "carbs": 35, "fiber": 5, "preparation": "Gram flour dumplings in yogurt gravy", "cancer_benefits": "Protein from besan"},
+            {"name": "Kela Kofta", "meal_type": "dinner", "cuisine": "Indian", "calories": 300, "protein": 8, "carbs": 40, "fiber": 6, "preparation": "Raw banana dumplings in tomato gravy", "cancer_benefits": "Iron rich"},
+            {"name": "Bhindi Masala (Jain)", "meal_type": "lunch", "cuisine": "Indian", "calories": 180, "protein": 4, "carbs": 22, "fiber": 6, "preparation": "Okra cooked with spices", "cancer_benefits": "High fiber"},
+            {"name": "Cabbage Foogath", "meal_type": "lunch", "cuisine": "South Indian", "calories": 160, "protein": 3, "carbs": 18, "fiber": 5, "preparation": "Steamed cabbage with coconut", "cancer_benefits": "Cruciferous benefits"},
+            {"name": "Tomato Soup (Jain)", "meal_type": "snack", "cuisine": "International", "calories": 120, "protein": 2, "carbs": 20, "fiber": 2, "preparation": "Fresh tomato soup with herbs", "cancer_benefits": "Lycopene"},
+            {"name": "Rice Kheer", "meal_type": "snack", "cuisine": "Indian", "calories": 260, "protein": 6, "carbs": 42, "fiber": 1, "preparation": "Rice pudding with milk and saffron", "cancer_benefits": "Calorie dense"},
+            {"name": "Shrikhand", "meal_type": "snack", "cuisine": "Indian", "calories": 300, "protein": 8, "carbs": 35, "fiber": 0, "preparation": "Sweet strained yogurt", "cancer_benefits": "Probiotic"},
+            {"name": "Basundi", "meal_type": "snack", "cuisine": "Indian", "calories": 320, "protein": 10, "carbs": 38, "fiber": 0, "preparation": "Thickened sweetened milk", "cancer_benefits": "Calcium rich"},
+            {"name": "Puran Poli", "meal_type": "snack", "cuisine": "Indian", "calories": 280, "protein": 6, "carbs": 50, "fiber": 4, "preparation": "Sweet lentil stuffed flatbread", "cancer_benefits": "Iron and protein"},
+            {"name": "Moong Dal Halwa", "meal_type": "snack", "cuisine": "Indian", "calories": 350, "protein": 8, "carbs": 45, "fiber": 3, "preparation": "Sweet lentil pudding with ghee", "cancer_benefits": "Energy dense"},
+            {"name": "Dahi Vada (Jain)", "meal_type": "snack", "cuisine": "Indian", "calories": 240, "protein": 8, "carbs": 28, "fiber": 3, "preparation": "Lentil dumplings in yogurt", "cancer_benefits": "Cooling and protein"},
+            {"name": "Khandvi", "meal_type": "snack", "cuisine": "Gujarati", "calories": 180, "protein": 8, "carbs": 20, "fiber": 3, "preparation": "Gram flour rolls", "cancer_benefits": "Gluten free"},
+            {"name": "Dhokla (Jain)", "meal_type": "breakfast", "cuisine": "Gujarati", "calories": 160, "protein": 6, "carbs": 24, "fiber": 2, "preparation": "Steamed gram flour cake", "cancer_benefits": "Fermented"},
+            {"name": "Idli (Jain)", "meal_type": "breakfast", "cuisine": "South Indian", "calories": 140, "protein": 6, "carbs": 30, "fiber": 2, "preparation": "Steamed rice cakes", "cancer_benefits": "Easy to digest"},
+            {"name": "Dosa (Jain)", "meal_type": "breakfast", "cuisine": "South Indian", "calories": 220, "protein": 4, "carbs": 40, "fiber": 2, "preparation": "Rice crepe (plain or with raw banana)", "cancer_benefits": "Gluten free option"},
+            {"name": "Upma (Jain)", "meal_type": "breakfast", "cuisine": "South Indian", "calories": 240, "protein": 6, "carbs": 42, "fiber": 4, "preparation": "Semolina porridge with peas/corn", "cancer_benefits": "Quick energy"},
+            {"name": "Poha (Jain)", "meal_type": "breakfast", "cuisine": "Indian", "calories": 260, "protein": 5, "carbs": 48, "fiber": 3, "preparation": "Flattened rice with peanuts", "cancer_benefits": "Iron rich"},
+            {"name": "Sabudana Khichdi", "meal_type": "breakfast", "cuisine": "Indian", "calories": 320, "protein": 4, "carbs": 60, "fiber": 2, "preparation": "Tapioca pearls with peanuts", "cancer_benefits": "Gluten free energy"},
+            {"name": "Rajma (Jain)", "meal_type": "lunch", "cuisine": "Indian", "calories": 280, "protein": 14, "carbs": 45, "fiber": 10, "preparation": "Kidney beans in tomato gravy", "cancer_benefits": "High fiber"},
+            {"name": "Chole (Jain)", "meal_type": "lunch", "cuisine": "Indian", "calories": 300, "protein": 14, "carbs": 48, "fiber": 10, "preparation": "Chickpeas in tomato gravy", "cancer_benefits": "High protein"},
+            {"name": "Green Gram Curry", "meal_type": "dinner", "cuisine": "Indian", "calories": 220, "protein": 12, "carbs": 35, "fiber": 8, "preparation": "Whole moong bean curry", "cancer_benefits": "Easy to digest"},
+            {"name": "Methi Thepla (Jain)", "meal_type": "breakfast", "cuisine": "Gujarati", "calories": 200, "protein": 6, "carbs": 30, "fiber": 4, "preparation": "Fenugreek flatbread", "cancer_benefits": "Iron rich"},
+            {"name": "Rotla", "meal_type": "lunch", "cuisine": "Indian", "calories": 240, "protein": 6, "carbs": 45, "fiber": 6, "preparation": "Millet flatbread", "cancer_benefits": "Gluten free grain"},
+            {"name": "Khichdi (Jain)", "meal_type": "dinner", "cuisine": "Indian", "calories": 200, "protein": 8, "carbs": 35, "fiber": 4, "preparation": "Rice and lentil porridge", "cancer_benefits": "Comfort food"},
+            {"name": "Curd Rice", "meal_type": "lunch", "cuisine": "South Indian", "calories": 220, "protein": 6, "carbs": 35, "fiber": 2, "preparation": "Yogurt rice", "cancer_benefits": "Probiotic"},
+            {"name": "Fruit Chaat", "meal_type": "snack", "cuisine": "Indian", "calories": 140, "protein": 2, "carbs": 35, "fiber": 4, "preparation": "Mixed fruits with pepper", "cancer_benefits": "Vitamins"},
+            {"name": "Roasted Makhana", "meal_type": "snack", "cuisine": "Indian", "calories": 160, "protein": 4, "carbs": 28, "fiber": 2, "preparation": "Fox nuts roasted in ghee", "cancer_benefits": "Low GI snack"},
+            {"name": "Banana Chips", "meal_type": "snack", "cuisine": "South Indian", "calories": 180, "protein": 2, "carbs": 25, "fiber": 2, "preparation": "Fried raw banana slices", "cancer_benefits": "Potassium"}
+        ],
+        "veg_egg": [
+            # Vegetarian + Eggs
+            {"name": "Egg Curry", "meal_type": "dinner", "cuisine": "Indian", "calories": 280, "protein": 14, "carbs": 12, "fiber": 2, "preparation": "Boiled eggs in spiced gravy", "cancer_benefits": "High quality protein"},
+            {"name": "Egg Bhurji", "meal_type": "breakfast", "cuisine": "Indian", "calories": 240, "protein": 16, "carbs": 6, "fiber": 1, "preparation": "Scrambled eggs with spices", "cancer_benefits": "Muscle repair"},
+            {"name": "Omelette", "meal_type": "breakfast", "cuisine": "International", "calories": 220, "protein": 14, "carbs": 2, "fiber": 0, "preparation": "Beaten eggs cooked in pan", "cancer_benefits": "Complete protein"},
+            {"name": "Egg Fried Rice", "meal_type": "lunch", "cuisine": "Asian", "calories": 350, "protein": 12, "carbs": 50, "fiber": 2, "preparation": "Rice stir fried with egg and veggies", "cancer_benefits": "Balanced meal"},
+            {"name": "Shakshuka", "meal_type": "breakfast", "cuisine": "Mediterranean", "calories": 260, "protein": 14, "carbs": 15, "fiber": 4, "preparation": "Eggs poached in tomato sauce", "cancer_benefits": "Lycopene and protein"},
+            {"name": "Egg Salad Sandwich", "meal_type": "lunch", "cuisine": "International", "calories": 320, "protein": 16, "carbs": 30, "fiber": 4, "preparation": "Boiled egg mix in bread", "cancer_benefits": "Easy lunch"},
+            {"name": "Spinach Frittata", "meal_type": "breakfast", "cuisine": "Italian", "calories": 240, "protein": 14, "carbs": 6, "fiber": 2, "preparation": "Baked egg with spinach", "cancer_benefits": "Iron and protein"},
+            {"name": "Egg Drop Soup", "meal_type": "snack", "cuisine": "Asian", "calories": 120, "protein": 8, "carbs": 5, "fiber": 0, "preparation": "Broth with whisked egg", "cancer_benefits": "Easy to swallow"},
+            {"name": "French Toast", "meal_type": "breakfast", "cuisine": "International", "calories": 300, "protein": 10, "carbs": 40, "fiber": 2, "preparation": "Bread dipped in egg and milk", "cancer_benefits": "Calorie dense"},
+            {"name": "Deviled Eggs", "meal_type": "snack", "cuisine": "International", "calories": 180, "protein": 12, "carbs": 2, "fiber": 0, "preparation": "Stuffed boiled egg halves", "cancer_benefits": "High protein snack"},
+            {"name": "Egg Biryani", "meal_type": "dinner", "cuisine": "Indian", "calories": 400, "protein": 16, "carbs": 55, "fiber": 4, "preparation": "Spiced rice with boiled eggs", "cancer_benefits": "Complete meal"},
+            {"name": "Scotch Egg (Baked)", "meal_type": "snack", "cuisine": "International", "calories": 280, "protein": 18, "carbs": 15, "fiber": 1, "preparation": "Egg wrapped in veg/meat mix", "cancer_benefits": "Protein rich"},
+            {"name": "Egg Roast", "meal_type": "dinner", "cuisine": "South Indian", "calories": 260, "protein": 14, "carbs": 15, "fiber": 3, "preparation": "Eggs in onion tomato roast", "cancer_benefits": "Spicy and savory"},
+            {"name": "Quiche", "meal_type": "lunch", "cuisine": "French", "calories": 350, "protein": 12, "carbs": 25, "fiber": 2, "preparation": "Egg pie with vegetables", "cancer_benefits": "Calorie dense"},
+            {"name": "Egg Noodles", "meal_type": "lunch", "cuisine": "Asian", "calories": 380, "protein": 14, "carbs": 55, "fiber": 3, "preparation": "Noodles stir fried with egg", "cancer_benefits": "Energy source"},
+            {"name": "Boiled Eggs", "meal_type": "snack", "cuisine": "International", "calories": 140, "protein": 12, "carbs": 1, "fiber": 0, "preparation": "Hard or soft boiled eggs", "cancer_benefits": "Pure protein"},
+            {"name": "Egg Sandwich", "meal_type": "breakfast", "cuisine": "International", "calories": 280, "protein": 14, "carbs": 30, "fiber": 3, "preparation": "Fried egg in bread", "cancer_benefits": "Quick meal"},
+            {"name": "Egg Paratha", "meal_type": "breakfast", "cuisine": "Indian", "calories": 320, "protein": 12, "carbs": 40, "fiber": 4, "preparation": "Flatbread stuffed with egg", "cancer_benefits": "Filling breakfast"},
+            {"name": "Egg Chaat", "meal_type": "snack", "cuisine": "Indian", "calories": 180, "protein": 12, "carbs": 10, "fiber": 2, "preparation": "Boiled egg with spices and chutney", "cancer_benefits": "Tasty protein"},
+            {"name": "Egg Muffins", "meal_type": "breakfast", "cuisine": "International", "calories": 160, "protein": 10, "carbs": 5, "fiber": 1, "preparation": "Baked egg cups with veggies", "cancer_benefits": "Portable protein"},
+            {"name": "Egg Mayo Salad", "meal_type": "snack", "cuisine": "International", "calories": 240, "protein": 12, "carbs": 4, "fiber": 1, "preparation": "Chopped egg with mayonnaise", "cancer_benefits": "High calorie"},
+            {"name": "Anda Ghotala", "meal_type": "dinner", "cuisine": "Indian", "calories": 300, "protein": 18, "carbs": 12, "fiber": 2, "preparation": "Spicy egg mash", "cancer_benefits": "Flavorful protein"},
+            {"name": "Egg Korma", "meal_type": "dinner", "cuisine": "Indian", "calories": 320, "protein": 16, "carbs": 15, "fiber": 3, "preparation": "Eggs in creamy gravy", "cancer_benefits": "Rich and filling"},
+            {"name": "Egg Dosai", "meal_type": "dinner", "cuisine": "South Indian", "calories": 260, "protein": 10, "carbs": 35, "fiber": 2, "preparation": "Rice crepe topped with egg", "cancer_benefits": "Complete meal"},
+            {"name": "Egg Appam", "meal_type": "breakfast", "cuisine": "South Indian", "calories": 200, "protein": 8, "carbs": 30, "fiber": 1, "preparation": "Rice hopper with egg center", "cancer_benefits": "Light and protein rich"}
+        ],
+        "pescatarian": [
+            # Veg + Egg + Fish
+            {"name": "Grilled Salmon", "meal_type": "dinner", "cuisine": "International", "calories": 350, "protein": 25, "carbs": 0, "fiber": 0, "preparation": "Salmon fillet grilled with herbs", "cancer_benefits": "Omega-3 fatty acids"},
+            {"name": "Fish Curry", "meal_type": "lunch", "cuisine": "Indian", "calories": 300, "protein": 22, "carbs": 10, "fiber": 2, "preparation": "Fish in spicy coconut gravy", "cancer_benefits": "Anti-inflammatory"},
+            {"name": "Tuna Salad", "meal_type": "lunch", "cuisine": "International", "calories": 240, "protein": 20, "carbs": 8, "fiber": 2, "preparation": "Canned tuna with veggies", "cancer_benefits": "Lean protein"},
+            {"name": "Fish and Chips (Baked)", "meal_type": "dinner", "cuisine": "International", "calories": 450, "protein": 20, "carbs": 50, "fiber": 4, "preparation": "Baked breaded fish with potatoes", "cancer_benefits": "Comfort food"},
+            {"name": "Prawn Masala", "meal_type": "dinner", "cuisine": "Indian", "calories": 280, "protein": 18, "carbs": 12, "fiber": 2, "preparation": "Shrimp in spiced gravy", "cancer_benefits": "Selenium rich"},
+            {"name": "Fish Tacos", "meal_type": "lunch", "cuisine": "Mexican", "calories": 320, "protein": 18, "carbs": 35, "fiber": 4, "preparation": "Grilled fish in tortillas", "cancer_benefits": "Fun meal"},
+            {"name": "Sushi (Salmon/Tuna)", "meal_type": "lunch", "cuisine": "Japanese", "calories": 300, "protein": 15, "carbs": 45, "fiber": 2, "preparation": "Raw fish on vinegared rice", "cancer_benefits": "Healthy fats"},
+            {"name": "Fish Fry (Rava)", "meal_type": "snack", "cuisine": "Indian", "calories": 260, "protein": 20, "carbs": 15, "fiber": 1, "preparation": "Semolina coated fried fish", "cancer_benefits": "Tasty protein"},
+            {"name": "Baked Cod", "meal_type": "dinner", "cuisine": "International", "calories": 200, "protein": 22, "carbs": 0, "fiber": 0, "preparation": "White fish baked with lemon", "cancer_benefits": "Lean and light"},
+            {"name": "Fish Soup", "meal_type": "dinner", "cuisine": "International", "calories": 180, "protein": 15, "carbs": 10, "fiber": 2, "preparation": "Clear broth with fish chunks", "cancer_benefits": "Easy to digest"},
+            {"name": "Crab Cakes", "meal_type": "snack", "cuisine": "International", "calories": 240, "protein": 16, "carbs": 12, "fiber": 1, "preparation": "Crab meat patties", "cancer_benefits": "Zinc rich"},
+            {"name": "Prawn Biryani", "meal_type": "lunch", "cuisine": "Indian", "calories": 420, "protein": 20, "carbs": 55, "fiber": 3, "preparation": "Spiced rice with shrimp", "cancer_benefits": "Special occasion meal"},
+            {"name": "Fish Moilee", "meal_type": "dinner", "cuisine": "Indian", "calories": 320, "protein": 20, "carbs": 10, "fiber": 2, "preparation": "Fish in mild coconut milk gravy", "cancer_benefits": "Gentle on stomach"},
+            {"name": "Sardines on Toast", "meal_type": "snack", "cuisine": "International", "calories": 260, "protein": 18, "carbs": 20, "fiber": 3, "preparation": "Canned sardines on bread", "cancer_benefits": "High calcium and omega-3"},
+            {"name": "Fish Cutlet", "meal_type": "snack", "cuisine": "Indian", "calories": 220, "protein": 14, "carbs": 18, "fiber": 2, "preparation": "Spiced fish patties", "cancer_benefits": "Protein snack"},
+            {"name": "Clam Chowder", "meal_type": "dinner", "cuisine": "International", "calories": 300, "protein": 12, "carbs": 25, "fiber": 2, "preparation": "Creamy soup with clams", "cancer_benefits": "Iron rich"},
+            {"name": "Fish Pie", "meal_type": "dinner", "cuisine": "British", "calories": 400, "protein": 25, "carbs": 35, "fiber": 3, "preparation": "Fish in sauce topped with mash", "cancer_benefits": "Comforting"},
+            {"name": "Grilled Tilapia", "meal_type": "dinner", "cuisine": "International", "calories": 180, "protein": 24, "carbs": 0, "fiber": 0, "preparation": "Lightly seasoned grilled fish", "cancer_benefits": "Very lean protein"},
+            {"name": "Fish Tikka", "meal_type": "snack", "cuisine": "Indian", "calories": 240, "protein": 22, "carbs": 5, "fiber": 1, "preparation": "Tandoori grilled fish chunks", "cancer_benefits": "High protein low carb"},
+            {"name": "Shrimp Scampi", "meal_type": "dinner", "cuisine": "Italian", "calories": 320, "protein": 18, "carbs": 30, "fiber": 2, "preparation": "Shrimp in garlic butter with pasta", "cancer_benefits": "Flavorful"},
+            {"name": "Mackerel Curry", "meal_type": "dinner", "cuisine": "Indian", "calories": 340, "protein": 20, "carbs": 8, "fiber": 2, "preparation": "Oily fish in spicy gravy", "cancer_benefits": "High omega-3"},
+            {"name": "Fish Finger Sandwich", "meal_type": "lunch", "cuisine": "International", "calories": 380, "protein": 16, "carbs": 45, "fiber": 3, "preparation": "Breaded fish sticks in bread", "cancer_benefits": "Kid friendly"},
+            {"name": "Seafood Paella", "meal_type": "dinner", "cuisine": "Spanish", "calories": 450, "protein": 25, "carbs": 55, "fiber": 4, "preparation": "Rice with mixed seafood", "cancer_benefits": "Nutrient variety"},
+            {"name": "Steamed Fish", "meal_type": "dinner", "cuisine": "Asian", "calories": 160, "protein": 20, "carbs": 2, "fiber": 0, "preparation": "Fish steamed with ginger soy", "cancer_benefits": "Very easy to digest"},
+            {"name": "Fish Burger", "meal_type": "lunch", "cuisine": "International", "calories": 400, "protein": 20, "carbs": 45, "fiber": 3, "preparation": "Fish patty in bun", "cancer_benefits": "Filling meal"}
+        ],
+        "non_veg": [
+            # All foods including Chicken, Meat
+            {"name": "Chicken Curry", "meal_type": "dinner", "cuisine": "Indian", "calories": 320, "protein": 25, "carbs": 10, "fiber": 2, "preparation": "Chicken in spiced gravy", "cancer_benefits": "High protein"},
+            {"name": "Butter Chicken", "meal_type": "dinner", "cuisine": "Indian", "calories": 450, "protein": 22, "carbs": 15, "fiber": 2, "preparation": "Chicken in creamy tomato sauce", "cancer_benefits": "Calorie dense"},
+            {"name": "Chicken Biryani", "meal_type": "lunch", "cuisine": "Indian", "calories": 500, "protein": 25, "carbs": 60, "fiber": 4, "preparation": "Spiced rice with chicken", "cancer_benefits": "Complete meal"},
+            {"name": "Grilled Chicken Breast", "meal_type": "dinner", "cuisine": "International", "calories": 280, "protein": 30, "carbs": 0, "fiber": 0, "preparation": "Lean chicken grilled with herbs", "cancer_benefits": "Lean muscle building"},
+            {"name": "Chicken Soup", "meal_type": "snack", "cuisine": "International", "calories": 150, "protein": 12, "carbs": 10, "fiber": 1, "preparation": "Clear broth with chicken", "cancer_benefits": "Healing and hydrating"},
+            {"name": "Chicken Tikka", "meal_type": "snack", "cuisine": "Indian", "calories": 260, "protein": 28, "carbs": 5, "fiber": 1, "preparation": "Roasted marinated chicken chunks", "cancer_benefits": "High protein snack"},
+            {"name": "Chicken Sandwich", "meal_type": "lunch", "cuisine": "International", "calories": 350, "protein": 20, "carbs": 35, "fiber": 3, "preparation": "Chicken slices in bread", "cancer_benefits": "Convenient meal"},
+            {"name": "Roast Chicken", "meal_type": "dinner", "cuisine": "International", "calories": 320, "protein": 28, "carbs": 0, "fiber": 0, "preparation": "Whole roasted chicken", "cancer_benefits": "Classic protein"},
+            {"name": "Chicken Stir Fry", "meal_type": "lunch", "cuisine": "Asian", "calories": 300, "protein": 22, "carbs": 25, "fiber": 4, "preparation": "Chicken with veggies and soy", "cancer_benefits": "Balanced meal"},
+            {"name": "Chicken Pasta", "meal_type": "dinner", "cuisine": "Italian", "calories": 400, "protein": 20, "carbs": 50, "fiber": 3, "preparation": "Pasta with chicken sauce", "cancer_benefits": "Energy and protein"},
+            {"name": "Mutton Curry", "meal_type": "dinner", "cuisine": "Indian", "calories": 400, "protein": 25, "carbs": 10, "fiber": 2, "preparation": "Goat meat in spicy gravy", "cancer_benefits": "Iron and B12"},
+            {"name": "Lamb Chops", "meal_type": "dinner", "cuisine": "International", "calories": 350, "protein": 22, "carbs": 0, "fiber": 0, "preparation": "Grilled lamb cutlets", "cancer_benefits": "Heme iron"},
+            {"name": "Keema Matar", "meal_type": "dinner", "cuisine": "Indian", "calories": 320, "protein": 20, "carbs": 12, "fiber": 4, "preparation": "Minced meat with peas", "cancer_benefits": "Easy to chew protein"},
+            {"name": "Chicken Korma", "meal_type": "dinner", "cuisine": "Indian", "calories": 380, "protein": 22, "carbs": 15, "fiber": 2, "preparation": "Chicken in mild cashew gravy", "cancer_benefits": "Calorie rich"},
+            {"name": "Chicken Salad", "meal_type": "lunch", "cuisine": "International", "calories": 280, "protein": 25, "carbs": 10, "fiber": 4, "preparation": "Greens topped with grilled chicken", "cancer_benefits": "Light meal"},
+            {"name": "Chicken Noodle Soup", "meal_type": "dinner", "cuisine": "International", "calories": 220, "protein": 15, "carbs": 25, "fiber": 2, "preparation": "Broth with noodles and chicken", "cancer_benefits": "Comfort food"},
+            {"name": "Chicken Shawarma", "meal_type": "snack", "cuisine": "Middle Eastern", "calories": 400, "protein": 20, "carbs": 35, "fiber": 3, "preparation": "Roasted chicken in pita wrap", "cancer_benefits": "Tasty protein"},
+            {"name": "Tandoori Chicken", "meal_type": "dinner", "cuisine": "Indian", "calories": 300, "protein": 28, "carbs": 5, "fiber": 1, "preparation": "Spiced roasted chicken legs", "cancer_benefits": "Flavorful protein"},
+            {"name": "Chicken Momos", "meal_type": "snack", "cuisine": "Asian", "calories": 240, "protein": 12, "carbs": 30, "fiber": 1, "preparation": "Steamed chicken dumplings", "cancer_benefits": "Steamed and light"},
+            {"name": "Chicken Stew", "meal_type": "dinner", "cuisine": "International", "calories": 280, "protein": 20, "carbs": 20, "fiber": 4, "preparation": "Chicken simmered with veggies", "cancer_benefits": "Easy to digest"},
+            {"name": "Chicken Pulao", "meal_type": "lunch", "cuisine": "Indian", "calories": 350, "protein": 18, "carbs": 45, "fiber": 3, "preparation": "Rice cooked with chicken stock", "cancer_benefits": "One pot meal"},
+            {"name": "Chicken 65", "meal_type": "snack", "cuisine": "Indian", "calories": 320, "protein": 20, "carbs": 15, "fiber": 1, "preparation": "Spicy fried chicken chunks", "cancer_benefits": "Appetite stimulant"},
+            {"name": "Chicken Reshmi Kabab", "meal_type": "snack", "cuisine": "Indian", "calories": 280, "protein": 25, "carbs": 5, "fiber": 1, "preparation": "Silky minced chicken skewers", "cancer_benefits": "Soft texture"},
+            {"name": "Chicken Manchow Soup", "meal_type": "snack", "cuisine": "Asian", "calories": 160, "protein": 10, "carbs": 15, "fiber": 2, "preparation": "Spicy thick soup", "cancer_benefits": "Clears sinuses"},
+            {"name": "Lemon Chicken", "meal_type": "dinner", "cuisine": "International", "calories": 260, "protein": 22, "carbs": 10, "fiber": 1, "preparation": "Chicken in lemon sauce", "cancer_benefits": "Vitamin C"}
+        ]
+    }
+    
+    # Path to the JSON file
+    file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'data', 'curated_food_database.json')
+    
+    # Write to file
+    with open(file_path, 'w', encoding='utf-8') as f:
+        json.dump(expanded_data, f, indent=2)
+    
+    print(f"Successfully expanded database at {file_path}")
+    print(f"Counts: Pure Veg: {len(expanded_data['pure_veg'])}, Vegan: {len(expanded_data['vegan'])}, Jain: {len(expanded_data['jain'])}, Veg+Egg: {len(expanded_data['veg_egg'])}, Pescatarian: {len(expanded_data['pescatarian'])}, Non-Veg: {len(expanded_data['non_veg'])}")
+
+if __name__ == "__main__":
+    expand_database()

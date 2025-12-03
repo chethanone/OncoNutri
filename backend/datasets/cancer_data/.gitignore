@@ -1,0 +1,8 @@
+# Secure files - DO NOT COMMIT
+.env
+*.env
+google_api_key.txt
+
+# Generated data
+enhanced_food_database.csv
+food_database_backup_*.csv

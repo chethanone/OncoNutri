@@ -4,7 +4,8 @@ class AppConstants {
   static const String appVersion = '1.0.0';
 
   // API Configuration
-  static const String apiBaseUrl = 'http://localhost:3000/api';
+  // Using localhost with ADB port forwarding
+  static const String apiBaseUrl = 'http://localhost:8000/api';
   
   // Storage Keys
   static const String authTokenKey = 'auth_token';
@@ -41,3 +42,4 @@ class AppConstants {
     'Spanish',
   ];
 }
+
