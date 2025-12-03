@@ -18,7 +18,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   final List<ChatMessage> _messages = [];
   bool _isTyping = false;
 
-  static const String _apiKey = 'AIzaSyDNxKtqP4X1Fb08dcjomb7_9uAZylmdUbs';
+  // TODO: SECURITY - Move API key to environment variables or secure storage
+  // For now using placeholder - replace with actual key in local development only
+  static const String _apiKey = 'YOUR_GEMINI_API_KEY_HERE';
   static const String _baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
   @override

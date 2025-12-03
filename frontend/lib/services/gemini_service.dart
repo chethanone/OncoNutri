@@ -2,8 +2,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class GeminiService {
-  // For production, use environment variables or secure storage
-  static const String _apiKey = 'AIzaSyDNxKtqP4X1Fb08dcjomb7_9uAZylmdUbs';
+  // TODO: SECURITY - Move API key to environment variables or secure storage
+  // For now using placeholder - replace with actual key in local development only
+  static const String _apiKey = 'YOUR_GEMINI_API_KEY_HERE';
   static const String _baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
   
   /// Understand and standardize cancer type input from user
