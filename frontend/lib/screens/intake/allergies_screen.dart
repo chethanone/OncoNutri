@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../models/intake_data.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/ui_components.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/auth_service.dart';
 import '../../services/gemini_service.dart';
+import '../../providers/theme_provider.dart';
 import '../food_recommendations_screen_v2.dart';
+import '../user_history_screen.dart';
 
 class AllergiesScreen extends StatefulWidget {
   final IntakeData intakeData;
@@ -28,10 +31,10 @@ class _AllergiesScreenState extends State<AllergiesScreen> {
     
     // Base allergen options that apply to everyone
     List<Map<String, dynamic>> baseOptions = [
-      {'id': 'Dairy', 'label': 'Dairy / Lactose', 'icon': Icons.water_drop, 'subtitle': 'Milk, cheese, yogurt'},
-      {'id': 'Gluten', 'label': 'Gluten', 'icon': Icons.grain, 'subtitle': 'Wheat, barley, rye'},
-      {'id': 'Nuts', 'label': 'Nuts', 'icon': Icons.nature, 'subtitle': 'Peanuts, tree nuts'},
-      {'id': 'Soy', 'label': 'Soy', 'icon': Icons.eco, 'subtitle': 'Soybean products'},
+      {'id': 'Dairy', 'label': l10n.dairy, 'icon': Icons.water_drop, 'subtitle': l10n.dairySubtitle},
+      {'id': 'Gluten', 'label': l10n.gluten, 'icon': Icons.grain, 'subtitle': l10n.glutenSubtitle},
+      {'id': 'Nuts', 'label': l10n.nuts, 'icon': Icons.nature, 'subtitle': l10n.nutsSubtitle},
+      {'id': 'Soy', 'label': l10n.soy, 'icon': Icons.eco, 'subtitle': l10n.soySubtitle},
       {'id': 'Diabetic', 'label': l10n.diabeticDiet, 'icon': Icons.monitor_heart, 'subtitle': l10n.diabeticSubtitle},
       {'id': 'Low Sodium', 'label': l10n.lowSodium, 'icon': Icons.no_food, 'subtitle': l10n.lowSodiumSubtitle},
     ];
@@ -47,18 +50,18 @@ class _AllergiesScreenState extends State<AllergiesScreen> {
     } else if (dietaryPref.contains('veg') && dietaryPref.contains('egg')) {
       // Veg+Egg: Can have eggs and dairy, but not meat/seafood
       // Don't add Seafood, Meat, Poultry (already excluded)
-      baseOptions.insert(3, {'id': 'Eggs', 'label': 'Eggs', 'icon': Icons.egg, 'subtitle': 'All egg products'});
+      baseOptions.insert(3, {'id': 'Eggs', 'label': l10n.eggs, 'icon': Icons.egg, 'subtitle': l10n.eggsSubtitle});
     } else if (dietaryPref.contains('pesc')) {
       // Pescatarian: Can have seafood and eggs, but not meat/poultry
       // Don't add Meat, Poultry (already excluded)
-      baseOptions.insert(3, {'id': 'Eggs', 'label': 'Eggs', 'icon': Icons.egg, 'subtitle': 'All egg products'});
-      baseOptions.insert(4, {'id': 'Seafood', 'label': 'Seafood', 'icon': Icons.set_meal, 'subtitle': 'Fish, shellfish'});
+      baseOptions.insert(3, {'id': 'Eggs', 'label': l10n.eggs, 'icon': Icons.egg, 'subtitle': l10n.eggsSubtitle});
+      baseOptions.insert(4, {'id': 'Seafood', 'label': l10n.seafood, 'icon': Icons.set_meal, 'subtitle': l10n.seafoodSubtitle});
     } else {
       // Non-Veg: Show all allergen options
-      baseOptions.insert(3, {'id': 'Eggs', 'label': 'Eggs', 'icon': Icons.egg, 'subtitle': 'All egg products'});
-      baseOptions.insert(4, {'id': 'Seafood', 'label': 'Seafood', 'icon': Icons.set_meal, 'subtitle': 'Fish, shellfish'});
-      baseOptions.insert(5, {'id': 'Red Meat', 'label': 'Red Meat', 'icon': Icons.restaurant, 'subtitle': 'Beef, pork, lamb'});
-      baseOptions.insert(6, {'id': 'Poultry', 'label': 'Poultry', 'icon': Icons.food_bank, 'subtitle': 'Chicken, turkey'});
+      baseOptions.insert(3, {'id': 'Eggs', 'label': l10n.eggs, 'icon': Icons.egg, 'subtitle': l10n.eggsSubtitle});
+      baseOptions.insert(4, {'id': 'Seafood', 'label': l10n.seafood, 'icon': Icons.set_meal, 'subtitle': l10n.seafoodSubtitle});
+      baseOptions.insert(5, {'id': 'Red Meat', 'label': l10n.redMeat, 'icon': Icons.restaurant, 'subtitle': l10n.redMeatSubtitle});
+      baseOptions.insert(6, {'id': 'Poultry', 'label': l10n.poultry, 'icon': Icons.food_bank, 'subtitle': l10n.poultrySubtitle});
     }
     
     return baseOptions;
@@ -112,7 +115,7 @@ class _AllergiesScreenState extends State<AllergiesScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Added: ${processedAllergies.join(", ")}'),
+            content: Text('${AppLocalizations.of(context)!.addedAllergies}: ${processedAllergies.join(", ")}'),
             backgroundColor: AppTheme.colorSuccess,
             behavior: SnackBarBehavior.floating,
           ),
@@ -135,6 +138,14 @@ class _AllergiesScreenState extends State<AllergiesScreen> {
     // Mark intake as completed
     await AuthService.setIntakeCompleted();
     
+    // Log history
+    final allergiesText = selectedAllergies.isEmpty ? 'No allergies' : selectedAllergies.join(', ');
+    await HistoryLogger.logEvent(
+      type: 'recommendation',
+      title: 'New Recommendations Generated',
+      description: 'Generated personalized diet recommendations with preferences: $allergiesText',
+    );
+    
     // Navigate to recommendations
     Navigator.push(
       context,
@@ -146,10 +157,13 @@ class _AllergiesScreenState extends State<AllergiesScreen> {
   
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = themeProvider.isDarkMode;
+    
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
+          gradient: AppTheme.backgroundGradientFor(context),
         ),
         child: SafeArea(
           child: Column(
@@ -164,26 +178,33 @@ class _AllergiesScreenState extends State<AllergiesScreen> {
                     Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.arrow_back),
+                          icon: Icon(
+                            Icons.arrow_back,
+                            color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                          ),
                           onPressed: () => Navigator.pop(context),
                         ),
                         const SizedBox(width: 8),
                         Text(
                           'Food Restrictions',
-                          style: AppTheme.h2,
+                          style: AppTheme.h2.copyWith(
+                            color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
                     Text(
                       AppLocalizations.of(context)!.allergiesQuestion,
-                      style: AppTheme.h1,
+                      style: AppTheme.h1.copyWith(
+                        color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       AppLocalizations.of(context)!.allergiesSubtitle,
                       style: AppTheme.body.copyWith(
-                        color: AppTheme.colorSubtext,
+                        color: isDark ? AppTheme.colorDarkSubtext : AppTheme.colorSubtext,
                       ),
                     ),
                   ],
@@ -216,16 +237,16 @@ class _AllergiesScreenState extends State<AllergiesScreen> {
                             child: Container(
                               decoration: BoxDecoration(
                                 color: isSelected 
-                                    ? AppTheme.colorPrimary.withOpacity(0.15)
-                                    : Colors.white,
+                                    ? (isDark ? AppTheme.colorPrimary.withOpacity(0.2) : AppTheme.colorPrimary.withOpacity(0.15))
+                                    : (isDark ? AppTheme.colorDarkSurface : Colors.white),
                                 borderRadius: BorderRadius.circular(AppTheme.radiusCard),
                                 border: Border.all(
                                   color: isSelected 
                                       ? AppTheme.colorPrimary 
-                                      : Colors.grey.shade300,
+                                      : (isDark ? AppTheme.colorDarkBorder : Colors.grey.shade300),
                                   width: isSelected ? 2 : 1,
                                 ),
-                                boxShadow: AppTheme.defaultShadow,
+                                boxShadow: isDark ? [] : AppTheme.defaultShadow,
                               ),
                               padding: const EdgeInsets.all(12),
                               child: Column(
@@ -236,7 +257,7 @@ class _AllergiesScreenState extends State<AllergiesScreen> {
                                     size: 32,
                                     color: isSelected 
                                         ? AppTheme.colorPrimary 
-                                        : Colors.grey.shade700,
+                                        : (isDark ? AppTheme.colorDarkSubtext : Colors.grey.shade700),
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
@@ -245,7 +266,7 @@ class _AllergiesScreenState extends State<AllergiesScreen> {
                                     style: AppTheme.bodyMedium.copyWith(
                                       color: isSelected 
                                           ? AppTheme.colorPrimary 
-                                          : AppTheme.colorText,
+                                          : (isDark ? AppTheme.colorDarkText : AppTheme.colorText),
                                       fontWeight: isSelected 
                                           ? FontWeight.w600 
                                           : FontWeight.normal,
@@ -256,7 +277,7 @@ class _AllergiesScreenState extends State<AllergiesScreen> {
                                     option['subtitle'],
                                     textAlign: TextAlign.center,
                                     style: AppTheme.caption.copyWith(
-                                      color: AppTheme.colorSubtext,
+                                      color: isDark ? AppTheme.colorDarkSubtext : AppTheme.colorSubtext,
                                       fontSize: 10,
                                     ),
                                     maxLines: 1,
@@ -282,20 +303,23 @@ class _AllergiesScreenState extends State<AllergiesScreen> {
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              AppTheme.colorPrimary.withOpacity(0.05),
-                              Colors.white,
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
+                          gradient: isDark 
+                              ? null
+                              : LinearGradient(
+                                  colors: [
+                                    AppTheme.colorPrimary.withOpacity(0.05),
+                                    Colors.white,
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                          color: isDark ? AppTheme.colorDarkSurface : null,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: AppTheme.colorPrimary.withOpacity(0.2),
                             width: 1.5,
                           ),
-                          boxShadow: [
+                          boxShadow: isDark ? [] : [
                             BoxShadow(
                               color: AppTheme.colorPrimary.withOpacity(0.08),
                               blurRadius: 12,
@@ -330,6 +354,7 @@ class _AllergiesScreenState extends State<AllergiesScreen> {
                                         style: AppTheme.bodyMedium.copyWith(
                                           fontWeight: FontWeight.w700,
                                           fontSize: 16,
+                                          color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
                                         ),
                                       ),
                                       const SizedBox(height: 2),
@@ -350,16 +375,16 @@ class _AllergiesScreenState extends State<AllergiesScreen> {
                             Text(
                               AppLocalizations.of(context)!.otherAllergiesDesc,
                               style: AppTheme.caption.copyWith(
-                                color: AppTheme.colorSubtext,
+                                color: isDark ? AppTheme.colorDarkSubtext : AppTheme.colorSubtext,
                                 height: 1.4,
                               ),
                             ),
                             const SizedBox(height: 16),
                             Container(
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: isDark ? AppTheme.colorDarkBackground : Colors.white,
                                 borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
+                                boxShadow: isDark ? [] : [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.05),
                                     blurRadius: 8,
@@ -371,11 +396,12 @@ class _AllergiesScreenState extends State<AllergiesScreen> {
                                 controller: _customAllergyController,
                                 style: AppTheme.bodyMedium.copyWith(
                                   fontSize: 15,
+                                  color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
                                 ),
                                 decoration: InputDecoration(
                                   hintText: AppLocalizations.of(context)!.otherAllergiesPlaceholder,
                                   hintStyle: TextStyle(
-                                    color: AppTheme.colorSubtext.withOpacity(0.6),
+                                    color: (isDark ? AppTheme.colorDarkSubtext : AppTheme.colorSubtext).withOpacity(0.6),
                                     fontSize: 14,
                                   ),
                                   prefixIcon: Icon(
@@ -383,12 +409,17 @@ class _AllergiesScreenState extends State<AllergiesScreen> {
                                     color: AppTheme.colorPrimary.withOpacity(0.7),
                                   ),
                                   suffixIcon: _isProcessingCustomInput
-                                      ? const Padding(
-                                          padding: EdgeInsets.all(12),
+                                      ? Padding(
+                                          padding: const EdgeInsets.all(12),
                                           child: SizedBox(
                                             width: 22,
                                             height: 22,
-                                            child: CircularProgressIndicator(strokeWidth: 2.5),
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2.5,
+                                              valueColor: AlwaysStoppedAnimation<Color>(
+                                                isDark ? AppTheme.colorPrimary : AppTheme.colorPrimary,
+                                              ),
+                                            ),
                                           ),
                                         )
                                       : IconButton(
@@ -399,7 +430,7 @@ class _AllergiesScreenState extends State<AllergiesScreen> {
                                           onPressed: _processCustomAllergy,
                                         ),
                                   filled: true,
-                                  fillColor: Colors.white,
+                                  fillColor: isDark ? AppTheme.colorDarkBackground : Colors.white,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
                                     borderSide: BorderSide.none,

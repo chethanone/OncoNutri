@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../models/intake_data.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/ui_components.dart';
 import '../../l10n/app_localizations.dart';
+import '../../providers/theme_provider.dart';
 import 'cancer_type_screen.dart';
 
 class DietaryPreferenceScreen extends StatefulWidget {
@@ -90,8 +92,12 @@ class _DietaryPreferenceScreenState extends State<DietaryPreferenceScreen> {
   }
   
   void _showPreferenceDetails(Map<String, dynamic> preference) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final isDark = themeProvider.isDarkMode;
+    
     showModalBottomSheet(
       context: context,
+      backgroundColor: isDark ? AppTheme.colorDarkSurface : Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -106,7 +112,7 @@ class _DietaryPreferenceScreenState extends State<DietaryPreferenceScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: (preference['color'] as Color).withOpacity(0.1),
+                    color: (preference['color'] as Color).withOpacity(isDark ? 0.3 : 0.1),
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
@@ -122,11 +128,15 @@ class _DietaryPreferenceScreenState extends State<DietaryPreferenceScreen> {
                     children: [
                       Text(
                         preference['label'],
-                        style: AppTheme.h2,
+                        style: AppTheme.h2.copyWith(
+                          color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                        ),
                       ),
                       Text(
                         preference['subtitle'],
-                        style: AppTheme.caption,
+                        style: AppTheme.caption.copyWith(
+                          color: isDark ? AppTheme.colorDarkSubtext : AppTheme.colorSubtext,
+                        ),
                       ),
                     ],
                   ),
@@ -136,7 +146,9 @@ class _DietaryPreferenceScreenState extends State<DietaryPreferenceScreen> {
             const SizedBox(height: 24),
             Text(
               preference['description'],
-              style: AppTheme.body,
+              style: AppTheme.body.copyWith(
+                color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+              ),
             ),
             const SizedBox(height: 24),
             SizedBox(
@@ -167,10 +179,13 @@ class _DietaryPreferenceScreenState extends State<DietaryPreferenceScreen> {
   
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = themeProvider.isDarkMode;
+    
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
+          gradient: AppTheme.backgroundGradientFor(context),
         ),
         child: SafeArea(
           child: Column(
@@ -185,26 +200,33 @@ class _DietaryPreferenceScreenState extends State<DietaryPreferenceScreen> {
                     Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.arrow_back),
+                          icon: Icon(
+                            Icons.arrow_back,
+                            color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                          ),
                           onPressed: () => Navigator.pop(context),
                         ),
                         const SizedBox(width: 8),
                         Text(
                           'Dietary Preference',
-                          style: AppTheme.h2,
+                          style: AppTheme.h2.copyWith(
+                            color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
                     Text(
                       AppLocalizations.of(context)!.dietaryPreferenceQuestion,
-                      style: AppTheme.h1,
+                      style: AppTheme.h1.copyWith(
+                        color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       AppLocalizations.of(context)!.dietaryPreferenceSubtitle,
                       style: AppTheme.body.copyWith(
-                        color: AppTheme.colorSubtext,
+                        color: isDark ? AppTheme.colorDarkSubtext : AppTheme.colorSubtext,
                       ),
                     ),
                   ],
@@ -232,18 +254,18 @@ class _DietaryPreferenceScreenState extends State<DietaryPreferenceScreen> {
                         duration: AppTheme.fadeInDuration,
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? (pref['color'] as Color).withOpacity(0.1)
-                              : AppTheme.colorSurface,
+                              ? (pref['color'] as Color).withOpacity(isDark ? 0.2 : 0.1)
+                              : (isDark ? AppTheme.colorDarkSurface : AppTheme.colorSurface),
                           border: Border.all(
                             color: isSelected
                                 ? pref['color']
-                                : AppTheme.colorBorder,
+                                : (isDark ? AppTheme.colorDarkBorder : AppTheme.colorBorder),
                             width: isSelected ? 2 : 1,
                           ),
                           borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-                          boxShadow: isSelected
+                          boxShadow: (isSelected && !isDark)
                               ? AppTheme.selectedShadow
-                              : AppTheme.defaultShadow,
+                              : (!isDark ? AppTheme.defaultShadow : []),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(16),
@@ -253,7 +275,7 @@ class _DietaryPreferenceScreenState extends State<DietaryPreferenceScreen> {
                               Container(
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: (pref['color'] as Color).withOpacity(0.2),
+                                  color: (pref['color'] as Color).withOpacity(isDark ? 0.3 : 0.2),
                                   shape: BoxShape.circle,
                                 ),
                                 child: Icon(
@@ -272,12 +294,15 @@ class _DietaryPreferenceScreenState extends State<DietaryPreferenceScreen> {
                                       pref['label'],
                                       style: AppTheme.bodyMedium.copyWith(
                                         fontWeight: FontWeight.w600,
+                                        color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
                                       ),
                                     ),
                                     const SizedBox(height: 2),
                                     Text(
                                       pref['subtitle'],
-                                      style: AppTheme.caption,
+                                      style: AppTheme.caption.copyWith(
+                                        color: isDark ? AppTheme.colorDarkSubtext : AppTheme.colorSubtext,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -286,7 +311,7 @@ class _DietaryPreferenceScreenState extends State<DietaryPreferenceScreen> {
                               IconButton(
                                 icon: Icon(
                                   Icons.info_outline,
-                                  color: AppTheme.colorSubtext,
+                                  color: isDark ? AppTheme.colorDarkSubtext : AppTheme.colorSubtext,
                                   size: 20,
                                 ),
                                 onPressed: () => _showPreferenceDetails(pref),
@@ -314,7 +339,7 @@ class _DietaryPreferenceScreenState extends State<DietaryPreferenceScreen> {
                     Text(
                       'Long press any option for more details',
                       style: AppTheme.caption.copyWith(
-                        color: AppTheme.colorSubtext,
+                        color: isDark ? AppTheme.colorDarkSubtext : AppTheme.colorSubtext,
                       ),
                       textAlign: TextAlign.center,
                     ),

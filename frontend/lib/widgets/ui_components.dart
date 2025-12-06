@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../utils/app_theme.dart';
+import '../providers/theme_provider.dart';
 
 /// OptionCard - Primary building block for MCQ and single-select flows
 class OptionCard extends StatefulWidget {
@@ -71,6 +73,9 @@ class _OptionCardState extends State<OptionCard>
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = themeProvider.isDarkMode;
+    
     return ScaleTransition(
       scale: _scaleAnimation,
       child: GestureDetector(
@@ -84,7 +89,7 @@ class _OptionCardState extends State<OptionCard>
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: widget.selected
-                ? const Color(0xFFFFF7F4)
+                ? (isDark ? AppTheme.primaryColor(context).withOpacity(0.2) : const Color(0xFFFFF7F4))
                 : AppTheme.surfaceColor(context),
             border: Border.all(
               color: widget.selected
@@ -93,8 +98,9 @@ class _OptionCardState extends State<OptionCard>
               width: widget.selected ? 2 : 1,
             ),
             borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-            boxShadow:
-                widget.selected ? AppTheme.selectedShadow : AppTheme.defaultShadow,
+            boxShadow: (widget.selected && !isDark) 
+                ? AppTheme.selectedShadow 
+                : (!isDark ? AppTheme.defaultShadow : []),
           ),
           child: Row(
             children: [
@@ -109,7 +115,9 @@ class _OptionCardState extends State<OptionCard>
                   children: [
                     Text(
                       widget.label,
-                      style: AppTheme.bodyMedium,
+                      style: AppTheme.bodyMedium.copyWith(
+                        color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                      ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -117,7 +125,9 @@ class _OptionCardState extends State<OptionCard>
                       const SizedBox(height: 4),
                       Text(
                         widget.subtitle!,
-                        style: AppTheme.caption,
+                        style: AppTheme.caption.copyWith(
+                          color: isDark ? AppTheme.colorDarkSubtext : AppTheme.colorSubtext,
+                        ),
                         maxLines: 3,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -158,6 +168,9 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = themeProvider.isDarkMode;
+    
     return SizedBox(
       width: fullWidth ? double.infinity : null,
       height: 48,
@@ -165,7 +178,7 @@ class PrimaryButton extends StatelessWidget {
         onPressed: loading ? null : onPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppTheme.primaryColor(context),
-          foregroundColor: Colors.white,
+          foregroundColor: isDark ? const Color(0xFF1A1A1A) : Colors.white,
           disabledBackgroundColor: AppTheme.primaryColor(context).withOpacity(0.5),
           elevation: 0,
           shape: RoundedRectangleBorder(
@@ -173,12 +186,14 @@ class PrimaryButton extends StatelessWidget {
           ),
         ),
         child: loading
-            ? const SizedBox(
+            ? SizedBox(
                 width: 20,
                 height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    isDark ? const Color(0xFF1A1A1A) : Colors.white
+                  ),
                 ),
               )
             : Text(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/progress_entry.dart';
 import '../services/api_service.dart';
+import '../l10n/app_localizations.dart';
 
 class ProgressHistoryScreen extends StatefulWidget {
   const ProgressHistoryScreen({Key? key}) : super(key: key);
@@ -35,10 +36,10 @@ class _ProgressHistoryScreenState extends State<ProgressHistoryScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
-              children: const [
+              children: [
                 Icon(Icons.error_outline, color: Colors.white),
                 SizedBox(width: 12),
-                Expanded(child: Text('Failed to load history')),
+                Expanded(child: Text(AppLocalizations.of(context)!.failedToLoadHistory)),
               ],
             ),
             backgroundColor: Colors.red,
@@ -56,7 +57,7 @@ class _ProgressHistoryScreenState extends State<ProgressHistoryScreen> {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0,
-        title: const Text('Progress Tracking'),
+        title: Text(AppLocalizations.of(context)!.progressTracking),
         centerTitle: true,
       ),
       body: _isLoading
@@ -74,7 +75,7 @@ class _ProgressHistoryScreenState extends State<ProgressHistoryScreen> {
         onPressed: () => _showAddEntryDialog(),
         backgroundColor: Theme.of(context).primaryColor,
         icon: const Icon(Icons.add_rounded),
-        label: const Text('Log Progress'),
+        label: Text(AppLocalizations.of(context)!.logProgress),
       ),
     );
   }
@@ -107,7 +108,7 @@ class _ProgressHistoryScreenState extends State<ProgressHistoryScreen> {
           ElevatedButton.icon(
             onPressed: () => _showAddEntryDialog(),
             icon: const Icon(Icons.add_rounded),
-            label: const Text('Add First Entry'),
+            label: Text(AppLocalizations.of(context)!.addFirstEntry),
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
@@ -280,7 +281,7 @@ class _ProgressHistoryScreenState extends State<ProgressHistoryScreen> {
           children: [
             Icon(Icons.add_chart_rounded, color: Theme.of(context).primaryColor),
             const SizedBox(width: 12),
-            const Text('Log Progress'),
+            Text(AppLocalizations.of(context)!.logProgress),
           ],
         ),
         content: SingleChildScrollView(
@@ -317,7 +318,7 @@ class _ProgressHistoryScreenState extends State<ProgressHistoryScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(color: Colors.grey.shade600)),
+            child: Text(AppLocalizations.of(context)!.cancel, style: TextStyle(color: Colors.grey.shade600)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -335,10 +336,10 @@ class _ProgressHistoryScreenState extends State<ProgressHistoryScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Row(
-                        children: const [
+                        children: [
                           Icon(Icons.check_circle, color: Colors.white),
                           SizedBox(width: 12),
-                          Text('Progress logged successfully'),
+                          Text(AppLocalizations.of(context)!.progressLoggedSuccess),
                         ],
                       ),
                       backgroundColor: Colors.green,
@@ -350,10 +351,10 @@ class _ProgressHistoryScreenState extends State<ProgressHistoryScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Row(
-                        children: const [
+                        children: [
                           Icon(Icons.error_outline, color: Colors.white),
                           SizedBox(width: 12),
-                          Expanded(child: Text('Failed to add entry')),
+                          Expanded(child: Text(AppLocalizations.of(context)!.failedToAddEntry)),
                         ],
                       ),
                       backgroundColor: Colors.red,
@@ -365,7 +366,7 @@ class _ProgressHistoryScreenState extends State<ProgressHistoryScreen> {
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: const Text('Please enter a valid score (0-100)'),
+                    content: Text(AppLocalizations.of(context)!.enterValidScore),
                     backgroundColor: Colors.orange,
                     behavior: SnackBarBehavior.floating,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -376,7 +377,7 @@ class _ProgressHistoryScreenState extends State<ProgressHistoryScreen> {
             style: ElevatedButton.styleFrom(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Add Entry'),
+            child: Text(AppLocalizations.of(context)!.addEntry),
           ),
         ],
       ),

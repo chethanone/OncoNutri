@@ -4,7 +4,10 @@ import 'package:http/http.dart' as http;
 class GeminiService {
   // TODO: SECURITY - Move API key to environment variables or secure storage
   // For now using placeholder - replace with actual key in local development only
-  static const String _apiKey = 'YOUR_GEMINI_API_KEY_HERE';
+  // API key should be loaded from backend or environment
+  // For production, fetch this from your backend API
+  static const String _apiKey = String.fromEnvironment('GOOGLE_API_KEY', defaultValue: 'AIzaSyBpbF-Z3KdsNUkZ6Eg1O2gvZn171lE3xs'); // Truncated for security
+  static String get apiKey => _apiKey;
   static const String _baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
   
   /// Understand and standardize cancer type input from user

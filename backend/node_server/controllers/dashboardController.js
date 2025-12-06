@@ -54,11 +54,24 @@ exports.getDashboard = asyncHandler(async (req, res) => {
     [userId]
   );
 
+  // If profile doesn't exist, try to create a basic one from user data
+  let profile;
   if (profileResult.rows.length === 0) {
-    return res.status(404).json({ error: 'Patient profile not found' });
+    // Try to create a basic profile with default values
+    try {
+      const createResult = await pool.query(
+        'INSERT INTO patient_profiles (user_id, age, weight, cancer_type, stage, allergies, other_conditions, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW()) RETURNING *',
+        [userId, 30, 70, 'Not specified', 'Not specified', '', '']
+      );
+      profile = createResult.rows[0];
+    } catch (createError) {
+      // If creation fails, return 404
+      return res.status(404).json({ error: 'Patient profile not found' });
+    }
+  } else {
+    profile = profileResult.rows[0];
   }
 
-  const profile = profileResult.rows[0];
   const patientId = profile.id;
 
   // Get latest diet recommendation status
@@ -132,7 +145,7 @@ function getPersonalizedTips(cancerType, stage, adherenceScore) {
   });
 
   // Rest tip based on stage
-  const restHours = stage.includes('III') || stage.includes('IV') ? '8-10' : '7-9';
+  const restHours = (stage && (stage.includes('III') || stage.includes('IV'))) ? '8-10' : '7-9';
   tips.push({
     icon: 'bedtime',
     title: 'Rest Well',
@@ -140,7 +153,7 @@ function getPersonalizedTips(cancerType, stage, adherenceScore) {
   });
 
   // Cancer-specific nutrition tips
-  const cancerLower = cancerType.toLowerCase();
+  const cancerLower = cancerType ? cancerType.toLowerCase() : '';
   
   if (cancerLower.includes('breast')) {
     tips.push({

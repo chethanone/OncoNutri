@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../models/intake_data.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/ui_components.dart';
 import '../../l10n/app_localizations.dart';
 import '../../services/gemini_service.dart';
+import '../../providers/theme_provider.dart';
 import 'treatment_stage_screen.dart';
 
 class CancerTypeScreen extends StatefulWidget {
@@ -23,18 +25,18 @@ class _CancerTypeScreenState extends State<CancerTypeScreen> {
   List<Map<String, dynamic>> _getCancerTypes(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return [
-      {'name': l10n.breastCancer, 'icon': Icons.favorite_rounded, 'color': Color(0xFFFF6B9D)},
-      {'name': l10n.lungCancer, 'icon': Icons.air_rounded, 'color': Color(0xFF64B5F6)},
-      {'name': l10n.colorectalCancer, 'icon': Icons.local_hospital_rounded, 'color': Color(0xFF9575CD)},
-      {'name': l10n.prostateCancer, 'icon': Icons.medical_services_rounded, 'color': Color(0xFF4DD0E1)},
-      {'name': l10n.stomachCancer, 'icon': Icons.restaurant_rounded, 'color': Color(0xFFFFB74D)},
-      {'name': l10n.liverCancer, 'icon': Icons.healing_rounded, 'color': Color(0xFFA1887F)},
-      {'name': l10n.pancreaticCancer, 'icon': Icons.science_rounded, 'color': Color(0xFF81C784)},
-      {'name': l10n.kidneyCancer, 'icon': Icons.water_drop_rounded, 'color': Color(0xFF4FC3F7)},
-      {'name': 'Bladder Cancer', 'icon': Icons.bubble_chart_rounded, 'color': Color(0xFF90CAF9)},
-      {'name': 'Thyroid Cancer', 'icon': Icons.thermostat_rounded, 'color': Color(0xFFBA68C8)},
-      {'name': 'Skin Cancer', 'icon': Icons.wb_sunny_rounded, 'color': Color(0xFFFFD54F)},
-      {'name': 'Blood Cancer', 'icon': Icons.bloodtype_rounded, 'color': Color(0xFFEF5350)},
+      {'id': 'Breast Cancer', 'name': l10n.breastCancer, 'icon': Icons.favorite_rounded, 'color': Color(0xFFFF6B9D)},
+      {'id': 'Lung Cancer', 'name': l10n.lungCancer, 'icon': Icons.air_rounded, 'color': Color(0xFF64B5F6)},
+      {'id': 'Colorectal Cancer', 'name': l10n.colorectalCancer, 'icon': Icons.local_hospital_rounded, 'color': Color(0xFF9575CD)},
+      {'id': 'Prostate Cancer', 'name': l10n.prostateCancer, 'icon': Icons.medical_services_rounded, 'color': Color(0xFF4DD0E1)},
+      {'id': 'Stomach Cancer', 'name': l10n.stomachCancer, 'icon': Icons.restaurant_rounded, 'color': Color(0xFFFFB74D)},
+      {'id': 'Liver Cancer', 'name': l10n.liverCancer, 'icon': Icons.healing_rounded, 'color': Color(0xFFA1887F)},
+      {'id': 'Pancreatic Cancer', 'name': l10n.pancreaticCancer, 'icon': Icons.science_rounded, 'color': Color(0xFF81C784)},
+      {'id': 'Kidney Cancer', 'name': l10n.kidneyCancer, 'icon': Icons.water_drop_rounded, 'color': Color(0xFF4FC3F7)},
+      {'id': 'Bladder Cancer', 'name': l10n.bladderCancer, 'icon': Icons.bubble_chart_rounded, 'color': Color(0xFF90CAF9)},
+      {'id': 'Thyroid Cancer', 'name': l10n.thyroidCancer, 'icon': Icons.thermostat_rounded, 'color': Color(0xFFBA68C8)},
+      {'id': 'Skin Cancer', 'name': l10n.skinCancer, 'icon': Icons.wb_sunny_rounded, 'color': Color(0xFFFFD54F)},
+      {'id': 'Blood Cancer', 'name': l10n.bloodCancer, 'icon': Icons.bloodtype_rounded, 'color': Color(0xFFEF5350)},
     ];
   }
   
@@ -83,7 +85,7 @@ class _CancerTypeScreenState extends State<CancerTypeScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Understood: $processedInput'),
+            content: Text('${AppLocalizations.of(context)!.understoodInput}: $processedInput'),
             backgroundColor: AppTheme.colorSuccess,
             behavior: SnackBarBehavior.floating,
           ),
@@ -111,6 +113,9 @@ class _CancerTypeScreenState extends State<CancerTypeScreen> {
   
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = themeProvider.isDarkMode;
+    
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -129,20 +134,27 @@ class _CancerTypeScreenState extends State<CancerTypeScreen> {
                     Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.arrow_back),
+                          icon: Icon(
+                            Icons.arrow_back,
+                            color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                          ),
                           onPressed: () => Navigator.pop(context),
                         ),
                         const SizedBox(width: 8),
                         Text(
                           'Cancer Type',
-                          style: AppTheme.h2,
+                          style: AppTheme.h2.copyWith(
+                            color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
                     Text(
                       AppLocalizations.of(context)!.cancerTypeQuestion,
-                      style: AppTheme.h1,
+                      style: AppTheme.h1.copyWith(
+                        color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -173,10 +185,10 @@ class _CancerTypeScreenState extends State<CancerTypeScreen> {
                         itemCount: _getCancerTypes(context).length,
                         itemBuilder: (context, index) {
                           final type = _getCancerTypes(context)[index];
-                          final isSelected = selectedType == type['name'];
+                          final isSelected = selectedType == type['id'];
                           
                           return InkWell(
-                            onTap: () => _handleSelection(type['name']),
+                            onTap: () => _handleSelection(type['id']),
                             borderRadius: BorderRadius.circular(AppTheme.radiusCard),
                             child: Container(
                               decoration: BoxDecoration(
@@ -284,6 +296,7 @@ class _CancerTypeScreenState extends State<CancerTypeScreen> {
                                         style: AppTheme.bodyMedium.copyWith(
                                           fontWeight: FontWeight.w700,
                                           fontSize: 16,
+                                          color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
                                         ),
                                       ),
                                       const SizedBox(height: 2),
@@ -304,16 +317,16 @@ class _CancerTypeScreenState extends State<CancerTypeScreen> {
                             Text(
                               'Can\'t find your cancer type? Type it below and our AI will help identify and process it.',
                               style: AppTheme.caption.copyWith(
-                                color: AppTheme.subtextColor(context),
+                                color: isDark ? AppTheme.colorDarkSubtext : AppTheme.subtextColor(context),
                                 height: 1.4,
                               ),
                             ),
                             const SizedBox(height: 16),
                             Container(
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: isDark ? AppTheme.colorDarkSurface : Colors.white,
                                 borderRadius: BorderRadius.circular(12),
-                                boxShadow: [
+                                boxShadow: isDark ? [] : [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.05),
                                     blurRadius: 8,
@@ -325,11 +338,12 @@ class _CancerTypeScreenState extends State<CancerTypeScreen> {
                                 controller: _customTypeController,
                                 style: AppTheme.bodyMedium.copyWith(
                                   fontSize: 15,
+                                  color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
                                 ),
                                 decoration: InputDecoration(
                                   hintText: 'e.g., Bone cancer, Brain cancer, Ovarian cancer...',
                                   hintStyle: TextStyle(
-                                    color: AppTheme.subtextColor(context).withOpacity(0.6),
+                                    color: (isDark ? AppTheme.colorDarkSubtext : AppTheme.subtextColor(context)).withOpacity(0.6),
                                     fontSize: 14,
                                   ),
                                   prefixIcon: Icon(
@@ -360,7 +374,7 @@ class _CancerTypeScreenState extends State<CancerTypeScreen> {
                                           onPressed: _processCustomInput,
                                         ),
                                   filled: true,
-                                  fillColor: Colors.white,
+                                  fillColor: isDark ? AppTheme.colorDarkSurface : Colors.white,
                                   contentPadding: const EdgeInsets.symmetric(
                                     horizontal: 16,
                                     vertical: 16,

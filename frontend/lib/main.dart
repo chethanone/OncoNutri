@@ -88,22 +88,37 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
     // Small delay for smoother experience
     await Future.delayed(const Duration(milliseconds: 500));
 
+    final isFirstTime = await AuthService.isFirstTime();
     final isLoggedIn = await AuthService.isLoggedIn();
     final hasCompletedIntake = await AuthService.hasCompletedIntake();
+
+    print('🔍 AUTH CHECK:');
+    print('   - isFirstTime: $isFirstTime');
+    print('   - isLoggedIn: $isLoggedIn');
+    print('   - hasCompletedIntake: $hasCompletedIntake');
 
     if (!mounted) return;
 
     Widget nextScreen;
 
-    if (isLoggedIn) {
-      // Already logged in
+    // First time opening the app - always show login screen
+    // This ensures brand new users see the welcome/login screen
+    if (isFirstTime) {
+      print('   → Going to: LoginScreen (first time user)');
+      await AuthService.setNotFirstTime(); // Mark as seen
+      nextScreen = const LoginScreen();
+    } else if (isLoggedIn) {
+      // Already logged in (not first time)
       if (hasCompletedIntake) {
+        print('   → Going to: HomeScreen (logged in + intake done)');
         nextScreen = const HomeScreen(); // Go straight to home
       } else {
+        print('   → Going to: AgePickerScreen (logged in but no intake)');
         nextScreen = const AgePickerScreen(); // Complete intake
       }
     } else {
-      // Not logged in - show login screen directly
+      // Not logged in and not first time - show login screen
+      print('   → Going to: LoginScreen (not logged in)');
       nextScreen = const LoginScreen();
     }
 

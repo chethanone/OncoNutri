@@ -1,4 +1,5 @@
 class FoodRecommendation {
+  final int? id;  // Database ID from saved_diet_items
   final int fdcId;
   final String name;
   final double score;
@@ -16,6 +17,7 @@ class FoodRecommendation {
   final String? foodType;  // Pure Veg, Non-Veg, Vegan, etc.
 
   FoodRecommendation({
+    this.id,
     required this.fdcId,
     required this.name,
     required this.score,
@@ -35,6 +37,7 @@ class FoodRecommendation {
 
   factory FoodRecommendation.fromJson(Map<String, dynamic> json) {
     return FoodRecommendation(
+      id: json['id'],
       fdcId: json['fdc_id'],
       name: json['name'],
       score: (json['score'] as num).toDouble(),
@@ -57,6 +60,7 @@ class FoodRecommendation {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'fdc_id': fdcId,
       'name': name,
       'score': score,

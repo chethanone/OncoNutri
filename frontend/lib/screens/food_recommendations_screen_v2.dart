@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:provider/provider.dart';
 import 'dart:async';
 import 'dart:math';
 import '../models/food_recommendation.dart';
@@ -7,6 +8,8 @@ import '../models/intake_data.dart';
 import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../utils/app_theme.dart';
+import '../providers/theme_provider.dart';
+import '../l10n/app_localizations.dart';
 import 'home_screen.dart';
 
 class FoodRecommendationsScreenV2 extends StatefulWidget {
@@ -59,7 +62,7 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
                 Icon(Icons.check_circle, color: Colors.white),
                 SizedBox(width: 12),
                 Expanded(
-                  child: Text('${food.name} added to your diet plan'),
+                  child: Text('${food.name} ${AppLocalizations.of(context)!.foodAddedToDietPlan}'),
                 ),
               ],
             ),
@@ -72,7 +75,7 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to add food to diet plan'),
+            content: Text(AppLocalizations.of(context)!.failedToAddFood),
             backgroundColor: AppTheme.colorDanger,
             behavior: SnackBarBehavior.floating,
           ),
@@ -83,7 +86,7 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text('${AppLocalizations.of(context)!.errorMessage}: $e'),
             backgroundColor: AppTheme.colorDanger,
             behavior: SnackBarBehavior.floating,
           ),
@@ -186,15 +189,37 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
         _error = null;
       });
 
-      final recommendations = await ApiService.getRecommendations(widget.intakeData);
+      // Get auth token
+      final token = await AuthService.getToken();
+      print('🔑 Loading recommendations with token: ${token != null ? "Present" : "Missing"}');
+
+      final recommendations = await ApiService.getRecommendations(widget.intakeData, token: token);
       
       setState(() {
         _recommendations = recommendations;
         _isLoading = false;
       });
     } catch (e) {
+      print('❌ Error loading recommendations: $e');
+      
+      // Create a user-friendly error message
+      String userMessage;
+      final errorString = e.toString().toLowerCase();
+      
+      if (errorString.contains('connection refused') || 
+          errorString.contains('failed host lookup') ||
+          errorString.contains('socketexception')) {
+        userMessage = 'Unable to connect to server. Please check your internet connection and try again.';
+      } else if (errorString.contains('timeout')) {
+        userMessage = 'Connection timed out. Please try again.';
+      } else if (errorString.contains('authentication')) {
+        userMessage = 'Session expired. Please log in again.';
+      } else {
+        userMessage = 'Unable to load recommendations. Please try again later.';
+      }
+      
       setState(() {
-        _error = e.toString();
+        _error = userMessage;
         _isLoading = false;
       });
     }
@@ -284,19 +309,31 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = themeProvider.isDarkMode;
+    
     if (_isLoading) {
       final currentTip = _nutritionTips[_currentTipIndex];
       return Scaffold(
         body: Container(
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                AppTheme.colorPrimary.withOpacity(0.1),
-                Colors.white,
-              ],
-            ),
+            gradient: isDark 
+                ? LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      AppTheme.colorDarkBackground,
+                      AppTheme.colorDarkSurface,
+                    ],
+                  )
+                : LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      AppTheme.colorPrimary.withOpacity(0.1),
+                      Colors.white,
+                    ],
+                  ),
           ),
           child: SafeArea(
             child: Column(
@@ -310,14 +347,28 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
                         const SizedBox(height: 24),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 32),
-                          child: Text(
-                            'Creating your personalized nutrition plan...',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[700],
-                              fontWeight: FontWeight.w500,
-                            ),
-                            textAlign: TextAlign.center,
+                          child: Column(
+                            children: [
+                              Text(
+                                'Creating your personalized nutrition plan...',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: isDark ? AppTheme.colorDarkText : Colors.grey[700],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                'This may take up to 90 seconds while we analyze thousands of foods for you...',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: isDark ? AppTheme.colorDarkSubtext : Colors.grey[500],
+                                  fontStyle: FontStyle.italic,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -344,9 +395,9 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
                     margin: const EdgeInsets.all(24),
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: isDark ? AppTheme.colorDarkSurface : Colors.white,
                       borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
+                      boxShadow: isDark ? [] : [
                         BoxShadow(
                           color: currentTip['color'].withOpacity(0.15),
                           blurRadius: 20,
@@ -354,7 +405,7 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
                         ),
                       ],
                       border: Border.all(
-                        color: currentTip['color'].withOpacity(0.3),
+                        color: currentTip['color'].withOpacity(isDark ? 0.4 : 0.3),
                         width: 1.5,
                       ),
                     ),
@@ -394,7 +445,7 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
                                     'Did you know?',
                                     style: TextStyle(
                                       fontSize: 10,
-                                      color: Colors.grey[600],
+                                      color: isDark ? AppTheme.colorDarkSubtext : Colors.grey[600],
                                     ),
                                   ),
                                 ],
@@ -407,7 +458,7 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
                           currentTip['tip'],
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey[800],
+                            color: isDark ? AppTheme.colorDarkText : Colors.grey[800],
                             height: 1.5,
                           ),
                           textAlign: TextAlign.left,
@@ -426,22 +477,109 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
     if (_error != null) {
       return Scaffold(
         appBar: AppBar(
-          title: const Text('Recommendations'),
+          title: Text(AppLocalizations.of(context)!.recommendations),
           backgroundColor: AppTheme.colorPrimary,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
+          ),
         ),
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 64, color: AppTheme.colorDanger),
-              const SizedBox(height: 16),
-              Text('Error: $_error'),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: _loadRecommendations,
-                child: const Text('Try Again'),
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.cloud_off,
+                    size: 64,
+                    color: Colors.red.shade300,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Connection Error',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade800,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  _error!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.grey.shade600,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _loadRecommendations,
+                      icon: const Icon(Icons.refresh),
+                      label: Text(AppLocalizations.of(context)!.tryAgain),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.colorPrimary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 2,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    OutlinedButton.icon(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.home),
+                      label: Text(AppLocalizations.of(context)!.goHome),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppTheme.colorPrimary,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.blue.shade100),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline, color: Colors.blue.shade700, size: 20),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'Make sure you have an active internet connection',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.blue.shade700,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -451,14 +589,44 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
   }
 
   Widget _buildRecommendationsView() {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = themeProvider.isDarkMode;
+    
+    if (_recommendations == null || _recommendations!.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(AppLocalizations.of(context)!.recommendations),
+          backgroundColor: AppTheme.colorPrimary,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.info_outline, size: 64, color: Colors.grey[400]),
+              const SizedBox(height: 16),
+              Text(
+                'No recommendations available',
+                style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(AppLocalizations.of(context)!.goBack),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    
     final mealGroups = _categorizeFoodsByMeal();
     final topFoods = _recommendations!.take(5).toList();
     
     double totalProtein = 0;
     double totalCalories = 0;
     for (var food in _recommendations!) {
-      totalProtein += food.keyNutrients['protein'] ?? 0;
-      totalCalories += food.keyNutrients['energy'] ?? 0;
+      totalProtein += food.keyNutrients['Protein'] ?? food.keyNutrients['protein'] ?? 0;
+      totalCalories += food.keyNutrients['Energy'] ?? food.keyNutrients['energy'] ?? 0;
     }
 
     return Scaffold(
@@ -503,23 +671,31 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
               margin: const EdgeInsets.all(16),
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppTheme.colorPrimary.withOpacity(0.1),
-                    AppTheme.colorPrimary400.withOpacity(0.1),
-                  ],
-                ),
+                gradient: isDark 
+                    ? null
+                    : LinearGradient(
+                        colors: [
+                          AppTheme.colorPrimary.withOpacity(0.1),
+                          AppTheme.colorPrimary400.withOpacity(0.1),
+                        ],
+                      ),
+                color: isDark ? AppTheme.colorDarkSurface : null,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppTheme.colorPrimary.withOpacity(0.3)),
+                border: Border.all(
+                  color: isDark 
+                      ? AppTheme.colorDarkBorder 
+                      : AppTheme.colorPrimary.withOpacity(0.3),
+                ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Daily Nutrition Goals',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -558,11 +734,12 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  child: const Text(
+                  child: Text(
                     'Top Recommendations',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
+                      color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
                     ),
                   ),
                 ),
@@ -584,21 +761,26 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
                 ),
                 const SizedBox(height: 8),
                 // Carousel indicators
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: topFoods.asMap().entries.map((entry) {
-                    return Container(
-                      width: _currentCarouselIndex == entry.key ? 12 : 8,
-                      height: 8,
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: _currentCarouselIndex == entry.key
-                            ? AppTheme.colorPrimary
-                            : Colors.grey[300],
-                      ),
+                Consumer<ThemeProvider>(
+                  builder: (context, themeProvider, child) {
+                    final isDark = themeProvider.isDarkMode;
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: topFoods.asMap().entries.map((entry) {
+                        return Container(
+                          width: _currentCarouselIndex == entry.key ? 12 : 8,
+                          height: 8,
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: _currentCarouselIndex == entry.key
+                                ? AppTheme.colorPrimary
+                                : (isDark ? AppTheme.colorDarkSubtext : Colors.grey[300]),
+                          ),
+                        );
+                      }).toList(),
                     );
-                  }).toList(),
+                  },
                 ),
                 const SizedBox(height: 16),
               ],
@@ -629,12 +811,15 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
         },
         backgroundColor: AppTheme.colorPrimary,
         icon: const Icon(Icons.home),
-        label: const Text('Go to Home'),
+        label: Text(AppLocalizations.of(context)!.goToHome),
       ),
     );
   }
 
   Widget _buildNutritionCard(IconData icon, String value, String label, Color color) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final isDark = themeProvider.isDarkMode;
+    
     return Column(
       children: [
         Container(
@@ -655,14 +840,14 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: color,
+            color: isDark ? color : color,
           ),
         ),
         Text(
           label,
           style: TextStyle(
             fontSize: 14,
-            color: Colors.grey[600],
+            color: isDark ? AppTheme.colorDarkSubtext : Colors.grey[600],
           ),
         ),
       ],
@@ -670,10 +855,12 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
   }
 
   Widget _buildCarouselCard(FoodRecommendation food) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final isDark = themeProvider.isDarkMode;
     final texture = _getFoodTexture(food.name);
     final category = _getFoodCategory(food.name, food.category);
-    final protein = food.keyNutrients['protein'] ?? 0;
-    final calories = food.keyNutrients['energy'] ?? 0;
+    final protein = food.keyNutrients['Protein'] ?? food.keyNutrients['protein'] ?? 0;
+    final calories = food.keyNutrients['Energy'] ?? food.keyNutrients['energy'] ?? 0;
 
     return GestureDetector(
       onTap: () => _showFoodDetails(food),
@@ -681,7 +868,7 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [
+          boxShadow: isDark ? [] : [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
               blurRadius: 12,
@@ -900,6 +1087,8 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
   }
 
   Widget _buildMealSection(String mealType, List<FoodRecommendation> foods) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final isDark = themeProvider.isDarkMode;
     final icons = {
       'Breakfast': Icons.wb_sunny,
       'Lunch': Icons.restaurant,
@@ -923,9 +1112,10 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
                 const SizedBox(width: 8),
                 Text(
                   mealType,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
+                    color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -955,16 +1145,18 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
   }
 
   Widget _buildFoodListItem(FoodRecommendation food) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final isDark = themeProvider.isDarkMode;
     final texture = _getFoodTexture(food.name);
-    final protein = food.keyNutrients['protein'] ?? 0;
-    final calories = food.keyNutrients['energy'] ?? 0;
+    final protein = food.keyNutrients['Protein'] ?? food.keyNutrients['protein'] ?? 0;
+    final calories = food.keyNutrients['Energy'] ?? food.keyNutrients['energy'] ?? 0;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppTheme.colorDarkSurface : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
+        boxShadow: isDark ? [] : [
           BoxShadow(
             color: Colors.grey.withOpacity(0.08),
             blurRadius: 12,
@@ -1006,10 +1198,10 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
                     children: [
                       Text(
                         food.name,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF2E2E2E),
+                          color: isDark ? AppTheme.colorDarkText : const Color(0xFF2E2E2E),
                           letterSpacing: 0.3,
                         ),
                         maxLines: 2,
@@ -1029,7 +1221,7 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
-                              color: Colors.grey[700],
+                              color: isDark ? AppTheme.colorDarkSubtext : Colors.grey[700],
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -1044,7 +1236,7 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
-                              color: Colors.grey[700],
+                              color: isDark ? AppTheme.colorDarkSubtext : Colors.grey[700],
                             ),
                           ),
                         ],
@@ -1130,6 +1322,8 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
   }
 
   void _showFoodDetails(FoodRecommendation food) {
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
+    final isDark = themeProvider.isDarkMode;
     final texture = _getFoodTexture(food.name);
     final category = _getFoodCategory(food.name, food.category);
     final benefits = _generatePersonalizedBenefits(food);
@@ -1143,9 +1337,9 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
         minChildSize: 0.5,
         maxChildSize: 0.95,
         builder: (context, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: isDark ? AppTheme.colorDarkSurface : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           child: Column(
             children: [
@@ -1155,7 +1349,7 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: isDark ? AppTheme.colorDarkBorder : Colors.grey[300],
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -1208,9 +1402,10 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
                     
                     Text(
                       food.name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
+                        color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
                       ),
                       textAlign: TextAlign.center,
                     ),
@@ -1253,14 +1448,15 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
                       'Nutrition Facts',
                       Column(
                         children: [
-                          _buildNutritionRow('Protein', '${(food.keyNutrients['protein'] ?? 0).toInt()}g', AppTheme.colorPrimary400),
-                          _buildNutritionRow('Calories', '${(food.keyNutrients['energy'] ?? 0).toInt()} kcal', AppTheme.colorDanger),
-                          if (food.keyNutrients['fiber'] != null)
-                            _buildNutritionRow('Fiber', '${(food.keyNutrients['fiber'] ?? 0).toInt()}g', AppTheme.colorSuccess),
-                          if (food.keyNutrients['calcium'] != null)
-                            _buildNutritionRow('Calcium', '${(food.keyNutrients['calcium'] ?? 0).toInt()}mg', AppTheme.colorPrimary),
+                          _buildNutritionRow('Protein', '${((food.keyNutrients['Protein'] ?? food.keyNutrients['protein'] ?? 0)).toInt()}g', AppTheme.colorPrimary400, isDark),
+                          _buildNutritionRow('Calories', '${((food.keyNutrients['Energy'] ?? food.keyNutrients['energy'] ?? 0)).toInt()} kcal', AppTheme.colorDanger, isDark),
+                          if ((food.keyNutrients['Fiber'] ?? food.keyNutrients['fiber']) != null)
+                            _buildNutritionRow('Fiber', '${((food.keyNutrients['Fiber'] ?? food.keyNutrients['fiber'] ?? 0)).toInt()}g', AppTheme.colorSuccess, isDark),
+                          if ((food.keyNutrients['Calcium'] ?? food.keyNutrients['calcium']) != null)
+                            _buildNutritionRow('Calcium', '${((food.keyNutrients['Calcium'] ?? food.keyNutrients['calcium'] ?? 0)).toInt()}mg', AppTheme.colorPrimary, isDark),
                         ],
                       ),
+                      isDark,
                     ),
                     
                     const SizedBox(height: 20),
@@ -1295,7 +1491,7 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
                                   style: TextStyle(
                                     fontSize: 15,
                                     height: 1.4,
-                                    color: Colors.grey[800],
+                                    color: isDark ? AppTheme.colorDarkText : Colors.grey[800],
                                   ),
                                 ),
                               ),
@@ -1303,6 +1499,7 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
                           ),
                         )).toList(),
                       ),
+                      isDark,
                     ),
                     
                     const SizedBox(height: 20),
@@ -1332,22 +1529,25 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
     );
   }
 
-  Widget _buildDetailSection(String title, Widget content) {
+  Widget _buildDetailSection(String title, Widget content, bool isDark) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
+        color: isDark ? AppTheme.colorDarkBackground : Colors.grey[50],
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(
+          color: isDark ? AppTheme.colorDarkBorder : Colors.grey[200]!,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
+              color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
             ),
           ),
           const SizedBox(height: 12),
@@ -1357,7 +1557,7 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
     );
   }
 
-  Widget _buildNutritionRow(String label, String value, Color color) {
+  Widget _buildNutritionRow(String label, String value, Color color, bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -1378,7 +1578,7 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
                 label,
                 style: TextStyle(
                   fontSize: 15,
-                  color: Colors.grey[700],
+                  color: isDark ? AppTheme.colorDarkSubtext : Colors.grey[700],
                 ),
               ),
             ],
@@ -1398,103 +1598,59 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
 
   List<String> _generatePersonalizedBenefits(FoodRecommendation food) {
     final benefits = <String>[];
-    final intakeData = widget.intakeData;
     
-    // Based on dietary preference (most important)
-    if (intakeData.dietaryPreference != null) {
-      final pref = intakeData.dietaryPreference!;
-      if (pref == 'Pure Veg' || pref == 'Vegetarian') {
-        benefits.add('100% Pure Vegetarian - perfectly aligned with your Pure Veg preference');
-      } else if (pref == 'Vegan') {
-        benefits.add('Completely plant-based - no animal products, ideal for vegan lifestyle');
-      } else if (pref == 'Jain') {
-        benefits.add('Jain-friendly - no root vegetables or restricted ingredients');
-      } else if (pref == 'Veg+Egg' || pref == 'Eggetarian') {
-        benefits.add('Vegetarian with eggs - provides both plant and egg-based nutrition');
-      } else if (pref == 'Pescatarian') {
-        benefits.add('Pescatarian-friendly - includes fish and seafood with plant foods');
-      }
+    // First, use the actual benefits from the API if available
+    if (food.benefits != null && food.benefits!.isNotEmpty) {
+      // Split the benefits string by newlines or common separators
+      final apiBenefits = food.benefits!
+          .split(RegExp(r'[\n•\-]'))
+          .map((b) => b.trim())
+          .where((b) => b.isNotEmpty && b.length > 10)
+          .toList();
+      
+      benefits.addAll(apiBenefits);
     }
     
-    // Based on eating ability (critical for texture)
-    if (intakeData.eatingAbility == 'liquids_only') {
-      benefits.add('Completely liquid texture - easy to swallow without any chewing required');
-    } else if (intakeData.eatingAbility == 'soft_only') {
-      benefits.add('Soft and gentle texture - requires minimal chewing, easy on your mouth');
-    } else if (intakeData.eatingAbility == 'reduced') {
-      benefits.add('Easy to digest and eat - perfect for when your appetite is reduced');
-    }
-    
-    // Based on symptoms
-    if (intakeData.symptoms != null && intakeData.symptoms!.isNotEmpty) {
-      for (var symptom in intakeData.symptoms!) {
-        if (symptom.toLowerCase().contains('nausea')) {
-          benefits.add('Gentle on stomach - helps manage nausea and reduces discomfort');
-          break;
-        } else if (symptom.toLowerCase().contains('sore mouth')) {
-          benefits.add('Smooth and soothing - won\'t irritate your mouth or throat');
-          break;
-        } else if (symptom.toLowerCase().contains('fatigue')) {
-          benefits.add('Energy-boosting nutrition - helps combat fatigue during treatment');
-          break;
+    // If we don't have enough benefits from API, add some personalized ones
+    if (benefits.length < 3) {
+      final intakeData = widget.intakeData;
+      
+      // Based on dietary preference
+      if (intakeData.dietaryPreference != null && benefits.length < 5) {
+        final pref = intakeData.dietaryPreference!;
+        if ((pref.contains('Pure Veg') || pref.contains('Vegetarian')) && 
+            (food.foodType?.contains('Veg') ?? false)) {
+          benefits.add('✓ Perfectly aligned with your vegetarian preference');
+        } else if (pref.contains('Vegan') && (food.foodType?.contains('Vegan') ?? false)) {
+          benefits.add('✓ Completely plant-based, ideal for vegan lifestyle');
         }
       }
-    }
-    
-    // Based on allergies (safety)
-    if (intakeData.allergies != null && intakeData.allergies!.isNotEmpty) {
-      final allergyList = intakeData.allergies!.join(', ');
-      benefits.add('Allergen-safe - free from your listed allergies ($allergyList)');
-    }
-    
-    // Based on protein content
-    final protein = food.keyNutrients['protein'] ?? 0;
-    if (protein > 15) {
-      benefits.add('High protein (${protein.toInt()}g per 100g) - essential for maintaining muscle mass during treatment');
-    } else if (protein > 8) {
-      benefits.add('Good protein source (${protein.toInt()}g per 100g) - supports healing and recovery');
-    }
-    
-    // Based on calories
-    final calories = food.keyNutrients['energy'] ?? 0;
-    if (calories > 300) {
-      benefits.add('Energy-dense (${calories.toInt()} kcal) - helps you meet daily caloric needs');
-    } else if (calories < 150 && intakeData.appetiteLevel == 'low') {
-      benefits.add('Light option (${calories.toInt()} kcal) - perfect when appetite is low');
-    }
-    
-    // Based on cancer type
-    if (intakeData.cancerType != null) {
-      benefits.add('Recommended for ${intakeData.cancerType} - supports immune function and healing');
-    }
-    
-    // Based on treatment stage
-    if (intakeData.treatmentStage?.toLowerCase().contains('active') ?? false) {
-      benefits.add('Treatment-friendly - gentle on your digestive system during active therapy');
-    } else if (intakeData.treatmentStage?.toLowerCase().contains('recovery') ?? false) {
-      benefits.add('Recovery nutrition - helps rebuild strength after treatment');
-    }
-    
-    // Generic benefits based on food type (if we don't have enough specific ones)
-    if (benefits.length < 3) {
-      if (food.name.toLowerCase().contains('dal') || food.name.toLowerCase().contains('lentil')) {
-        benefits.add('Rich in fiber and plant protein - promotes digestive health');
+      
+      // Based on texture and eating ability
+      if (intakeData.eatingAbility != null && food.texture != null && benefits.length < 5) {
+        if (intakeData.eatingAbility == 'liquids_only' && food.texture?.toLowerCase().contains('liquid') == true) {
+          benefits.add('✓ Liquid texture - easy to swallow without chewing');
+        } else if (intakeData.eatingAbility == 'soft_only' && food.texture?.toLowerCase().contains('soft') == true) {
+          benefits.add('✓ Soft texture - gentle on your mouth and easy to eat');
+        }
       }
-      if (food.name.toLowerCase().contains('paneer')) {
-        benefits.add('Excellent calcium source - supports bone health during treatment');
+      
+      // Based on protein content
+      final protein = food.keyNutrients['Protein'] ?? food.keyNutrients['protein'] ?? 0;
+      if (protein > 15 && benefits.length < 5) {
+        benefits.add('✓ High protein (${protein.toInt()}g) - essential for recovery and strength');
       }
-      if (food.name.toLowerCase().contains('smoothie') || food.name.toLowerCase().contains('juice')) {
-        benefits.add('Easy to digest and hydrating - perfect for staying nourished');
-      }
-      if (food.name.toLowerCase().contains('soup') || food.name.toLowerCase().contains('broth')) {
-        benefits.add('Warm and comforting - provides hydration and nutrition together');
+      
+      // Based on allergies
+      if (intakeData.allergies != null && intakeData.allergies!.isNotEmpty && benefits.length < 5) {
+        benefits.add('✓ Safe for your dietary restrictions and allergies');
       }
     }
     
-    // Always have at least 3 benefits
-    if (benefits.length < 3) {
-      benefits.add('Carefully selected based on your complete health profile');
-      benefits.add('Balanced nutrition to support your treatment journey');
+    // Ensure we have at least 3 benefits
+    if (benefits.isEmpty) {
+      benefits.add('Carefully selected based on your health profile');
+      benefits.add('Nutritionally balanced to support your treatment');
       benefits.add('Designed with your comfort and safety in mind');
     }
     

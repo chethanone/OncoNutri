@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../l10n/app_localizations.dart';
+import '../services/gemini_service.dart';
 import '../utils/app_theme.dart';
 
 class ChatbotScreen extends StatefulWidget {
@@ -20,8 +21,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
 
   // TODO: SECURITY - Move API key to environment variables or secure storage
   // For now using placeholder - replace with actual key in local development only
-  static const String _apiKey = 'YOUR_GEMINI_API_KEY_HERE';
-  static const String _baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+  // Use API key from GeminiService
+  static String get _apiKey => GeminiService.apiKey;
+  static const String _baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent';
 
   @override
   void initState() {
@@ -98,8 +100,13 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     _scrollToBottom();
     await _saveChatHistory();
 
+    print('📨 Sending message: "${text.substring(0, text.length > 50 ? 50 : text.length)}..."');
+
     try {
+      print('🔄 Calling Gemini API...');
       final response = await _getGeminiResponse(text);
+      
+      print('✅ Got response: "${response.substring(0, response.length > 50 ? 50 : response.length)}..."');
       
       final botMessage = ChatMessage(
         text: response,
@@ -115,7 +122,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       _scrollToBottom();
       await _saveChatHistory();
     } catch (e) {
-      print('Send message error: $e');
+      print('❌ Send message error: $e');
       setState(() {
         _messages.add(ChatMessage(
           text: "I'm experiencing connectivity issues. Here are some tips while we reconnect:\n\n"
@@ -175,12 +182,12 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     while (retryCount < maxRetries) {
       try {
         final url = Uri.parse('$_baseUrl?key=$_apiKey');
-      
-      String cancerContext = cancerType != null 
-          ? '\n\nIMPORTANT: The user is asking about $cancerType. Provide SPECIFIC food recommendations for $cancerType with detailed nutritional benefits. Focus your entire response on $cancerType nutrition.'
-          : '';
-      
-      final systemPrompt = '''You are a professional OncoNutri health assistant - a knowledgeable, compassionate medical nutrition specialist focused on cancer care.
+        
+        String cancerContext = cancerType != null 
+            ? '\n\nIMPORTANT: The user is asking about $cancerType. Provide SPECIFIC food recommendations for $cancerType with detailed nutritional benefits. Focus your entire response on $cancerType nutrition.'
+            : '';
+        
+        final systemPrompt = '''You are a professional OncoNutri health assistant - a knowledgeable, compassionate medical nutrition specialist focused on cancer care.
 
 Your role:
 - Provide evidence-based, professional nutrition guidance for cancer patients
@@ -238,44 +245,58 @@ User question: $userMessage''';
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         
+        print('✅ Gemini API Success - Status: 200');
+        print('📦 Response data keys: ${data.keys.toList()}');
+        
         // Check if we have valid response structure
-        if (data['candidates'] != null && 
-            data['candidates'].isNotEmpty &&
-            data['candidates'][0]['content'] != null &&
-            data['candidates'][0]['content']['parts'] != null &&
-            data['candidates'][0]['content']['parts'].isNotEmpty) {
+        if (data['candidates'] != null && data['candidates'].isNotEmpty) {
+          final candidate = data['candidates'][0];
           
-          String responseText = data['candidates'][0]['content']['parts'][0]['text'].toString();
-          
-          // Clean any markdown formatting that might have slipped through
-          responseText = _cleanMarkdown(responseText);
-          
-          return responseText;
+          // Check for parts in content
+          if (candidate['content'] != null && 
+              candidate['content']['parts'] != null &&
+              candidate['content']['parts'].isNotEmpty &&
+              candidate['content']['parts'][0]['text'] != null) {
+            
+            String responseText = candidate['content']['parts'][0]['text'].toString();
+            
+            print('💬 Gemini response length: ${responseText.length} characters');
+            
+            // Clean any markdown formatting that might have slipped through
+            responseText = _cleanMarkdown(responseText);
+            
+            print('✅ Returning cleaned response');
+            return responseText;
+          } else {
+            print('❌ No text in parts, checking alternative structure');
+            print('📦 Candidate structure: ${json.encode(candidate)}');
+            throw Exception('No text content found in API response');
+          }
         } else {
-          print('Invalid API response structure');
-          print('Full response: ${json.encode(data)}');
+          print('❌ Invalid API response structure - no candidates');
+          print('📦 Full response: ${json.encode(data)}');
           throw Exception('Invalid response structure from API');
         }
       } else {
-        print('API Error: ${response.statusCode} - ${response.body}');
+        print('❌ API Error: ${response.statusCode} - ${response.body}');
         throw Exception('API request failed with status: ${response.statusCode}');
       }
     } catch (e) {
       lastError = e as Exception;
       retryCount++;
-      print('Gemini API Error (attempt $retryCount/$maxRetries): $e');
+      print('❌ Gemini API Error (attempt $retryCount/$maxRetries): $e');
       
       if (retryCount < maxRetries) {
         // Wait before retrying with exponential backoff (500ms, 1000ms, 1500ms)
         int delayMs = 500 * retryCount;
-        print('Retrying in ${delayMs}ms...');
+        print('🔄 Retrying in ${delayMs}ms...');
         await Future.delayed(Duration(milliseconds: delayMs));
         continue; // Retry
       }
       
       // All retries failed, use fallback
-      print('All $maxRetries API retry attempts failed. Last error: $lastError');
-      print('Using intelligent fallback response...');
+      print('🚫 All $maxRetries API retry attempts failed. Last error: $lastError');
+      print('💡 Using intelligent fallback response...');
       break; // Exit retry loop
     }
     } // End retry loop
@@ -312,27 +333,28 @@ User question: $userMessage''';
 
   Future<void> _deleteMessage(int index) async {
     final localizations = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? AppTheme.colorDarkSurface : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           localizations.chatDeleteMessage,
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF2D2D2D),
+            color: isDark ? AppTheme.colorDarkText : const Color(0xFF2D2D2D),
           ),
         ),
         content: Text(
           localizations.chatDeleteConfirm,
-          style: TextStyle(color: Color(0xFF666666)),
+          style: TextStyle(color: isDark ? AppTheme.colorDarkSubtext : const Color(0xFF666666)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(localizations.cancel, style: TextStyle(color: Color(0xFF666666))),
+            child: Text(localizations.cancel, style: TextStyle(color: isDark ? AppTheme.colorDarkSubtext : const Color(0xFF666666))),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -376,27 +398,28 @@ User question: $userMessage''';
 
   Future<void> _clearChat() async {
     final localizations = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? AppTheme.colorDarkSurface : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           localizations.chatClearHistory,
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
-            color: Color(0xFF2D2D2D),
+            color: isDark ? AppTheme.colorDarkText : const Color(0xFF2D2D2D),
           ),
         ),
         content: Text(
           localizations.chatClearConfirm,
-          style: TextStyle(color: Color(0xFF666666)),
+          style: TextStyle(color: isDark ? AppTheme.colorDarkSubtext : const Color(0xFF666666)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text(localizations.cancel, style: TextStyle(color: Color(0xFF666666))),
+            child: Text(localizations.cancel, style: TextStyle(color: isDark ? AppTheme.colorDarkSubtext : const Color(0xFF666666))),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -428,12 +451,13 @@ User question: $userMessage''';
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: isDark ? AppTheme.colorDarkBackground : const Color(0xFFF5F5F5),
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: const Color(0xFF2D2D2D),
+        backgroundColor: isDark ? AppTheme.colorDarkSurface : const Color(0xFF2D2D2D),
         title: Row(
           children: [
             CircleAvatar(
@@ -482,6 +506,8 @@ User question: $userMessage''';
   }
 
   Widget _buildEmptyState() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -489,12 +515,14 @@ User question: $userMessage''';
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFF4CAF50).withOpacity(0.1),
+              color: isDark 
+                  ? AppTheme.colorDarkSurface.withOpacity(0.5) 
+                  : const Color(0xFF4CAF50).withOpacity(0.1),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.chat_bubble_outline_rounded,
               size: 60,
-              color: Color(0xFF4CAF50),
+              color: isDark ? AppTheme.colorDarkPrimary : const Color(0xFF4CAF50),
             ),
           ),
           const SizedBox(height: 24),
@@ -503,7 +531,7 @@ User question: $userMessage''';
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF2D2D2D),
+              color: isDark ? AppTheme.colorDarkText : const Color(0xFF2D2D2D),
             ),
           ),
           const SizedBox(height: 8),
@@ -511,7 +539,7 @@ User question: $userMessage''';
             AppLocalizations.of(context)!.chatAskAnything,
             style: TextStyle(
               fontSize: 14,
-              color: Color(0xFF666666),
+              color: isDark ? AppTheme.colorDarkSubtext : const Color(0xFF666666),
             ),
           ),
         ],
@@ -520,6 +548,8 @@ User question: $userMessage''';
   }
 
   Widget _buildMessageBubble(ChatMessage message, int index) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return TweenAnimationBuilder<double>(
       key: ValueKey('${message.timestamp.millisecondsSinceEpoch}_$index'),
       duration: const Duration(milliseconds: 400),
@@ -557,7 +587,9 @@ User question: $userMessage''';
                 child: Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: message.isUser ? const Color(0xFF2D2D2D) : Colors.white,
+                    color: message.isUser 
+                        ? (isDark ? AppTheme.colorDarkPrimary : const Color(0xFF2D2D2D))
+                        : (isDark ? AppTheme.colorDarkSurface : Colors.white),
                     borderRadius: BorderRadius.only(
                       topLeft: const Radius.circular(16),
                       topRight: const Radius.circular(16),
@@ -580,7 +612,9 @@ User question: $userMessage''';
                         style: TextStyle(
                           fontSize: 15,
                           height: 1.5,
-                          color: message.isUser ? Colors.white : const Color(0xFF2D2D2D),
+                          color: message.isUser 
+                              ? Colors.white 
+                              : (isDark ? AppTheme.colorDarkText : const Color(0xFF2D2D2D)),
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -639,8 +673,10 @@ User question: $userMessage''';
   }
 
   Widget _buildTypingIndicator() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         children: [
           CircleAvatar(
@@ -652,7 +688,7 @@ User question: $userMessage''';
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? AppTheme.colorDarkSurface : Colors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -704,10 +740,12 @@ User question: $userMessage''';
   }
 
   Widget _buildMessageInput() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppTheme.colorDarkSurface : Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -721,14 +759,15 @@ User question: $userMessage''';
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F5F5),
+                color: isDark ? AppTheme.colorDarkBackground : const Color(0xFFF5F5F5),
                 borderRadius: BorderRadius.circular(24),
               ),
               child: TextField(
                 controller: _messageController,
+                style: TextStyle(color: isDark ? AppTheme.colorDarkText : const Color(0xFF2D2D2D)),
                 decoration: InputDecoration(
                   hintText: 'Ask me anything...',
-                  hintStyle: const TextStyle(color: Color(0xFF999999)),
+                  hintStyle: TextStyle(color: isDark ? AppTheme.colorDarkSubtext : const Color(0xFF999999)),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 20,

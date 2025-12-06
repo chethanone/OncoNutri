@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/intake_data.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/ui_components.dart';
+import '../../l10n/app_localizations.dart';
 import 'allergies_screen.dart';
 
 class EatingAbilityScreen extends StatefulWidget {
@@ -16,44 +17,47 @@ class EatingAbilityScreen extends StatefulWidget {
 class _EatingAbilityScreenState extends State<EatingAbilityScreen> {
   String? selectedAbility;
   
-  final List<Map<String, dynamic>> abilityOptions = [
-    {
-      'id': 'normal',
-      'label': 'Normal',
-      'subtitle': 'Can eat regular foods',
-      'icon': Icons.restaurant_menu,
-    },
-    {
-      'id': 'reduced',
-      'label': 'Reduced',
-      'subtitle': 'Eating smaller portions',
-      'icon': Icons.remove_circle_outline,
-    },
-    {
-      'id': 'soft_only',
-      'label': 'Soft Foods Only',
-      'subtitle': 'Difficulty with solid foods',
-      'icon': Icons.soup_kitchen,
-    },
-    {
-      'id': 'liquids_only',
-      'label': 'Liquids Only',
-      'subtitle': 'Can only consume liquids',
-      'icon': Icons.local_drink,
-    },
-    {
-      'id': 'cannot_eat',
-      'label': 'Cannot Eat',
-      'subtitle': 'Unable to eat or drink',
-      'icon': Icons.block,
-    },
-  ];
-  
   @override
   void initState() {
     super.initState();
     // Don't pre-select - user must make a choice
     selectedAbility = null;
+  }
+  
+  List<Map<String, dynamic>> _getAbilityOptions(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return [
+      {
+        'id': 'normal',
+        'label': l10n.normalEating,
+        'subtitle': l10n.normalEatingDesc,
+        'icon': Icons.restaurant_menu,
+      },
+      {
+        'id': 'reduced',
+        'label': l10n.reducedEating,
+        'subtitle': l10n.reducedEatingDesc,
+        'icon': Icons.remove_circle_outline,
+      },
+      {
+        'id': 'soft_only',
+        'label': l10n.softFoodsOnly,
+        'subtitle': l10n.softFoodsOnlyDesc,
+        'icon': Icons.soup_kitchen,
+      },
+      {
+        'id': 'liquids_only',
+        'label': l10n.liquidsOnly,
+        'subtitle': l10n.liquidsOnlyDesc,
+        'icon': Icons.local_drink,
+      },
+      {
+        'id': 'cannot_eat',
+        'label': l10n.cannotEat,
+        'subtitle': l10n.cannotEatDesc,
+        'icon': Icons.block,
+      },
+    ];
   }
   
   void _continue() {
@@ -75,14 +79,15 @@ class _EatingAbilityScreenState extends State<EatingAbilityScreen> {
   }
   
   void _showEmergencyDialog() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Row(
-          children: const [
-            Icon(Icons.warning, color: AppTheme.colorDanger),
-            SizedBox(width: 8),
-            Text('Important Notice'),
+          children: [
+            const Icon(Icons.warning, color: AppTheme.colorDanger),
+            const SizedBox(width: 8),
+            Text(l10n.emergencyNotice),
           ],
         ),
         content: Column(
@@ -90,7 +95,7 @@ class _EatingAbilityScreenState extends State<EatingAbilityScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'If you cannot eat or drink, please contact your healthcare provider immediately.',
+              l10n.cannotEatWarning,
               style: AppTheme.body,
             ),
             const SizedBox(height: 16),
@@ -104,12 +109,20 @@ class _EatingAbilityScreenState extends State<EatingAbilityScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Emergency Helpline',
+                    l10n.emergencyContacts,
                     style: AppTheme.bodyMedium,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.nationalHelpline,
+                    style: AppTheme.body.copyWith(
+                      color: AppTheme.colorDanger,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Emergency: 102 (India)',
+                    l10n.localER,
                     style: AppTheme.body.copyWith(
                       color: AppTheme.colorDanger,
                       fontWeight: FontWeight.w600,
@@ -122,7 +135,7 @@ class _EatingAbilityScreenState extends State<EatingAbilityScreen> {
         ),
         actions: [
           GhostButton(
-            label: 'Go Back',
+            label: l10n.goBack,
             onPressed: () {
               Navigator.pop(context);
               setState(() {
@@ -131,7 +144,7 @@ class _EatingAbilityScreenState extends State<EatingAbilityScreen> {
             },
           ),
           PrimaryButton(
-            label: 'Continue',
+            label: l10n.continueAnyway,
             onPressed: () {
               Navigator.pop(context);
               Navigator.push(
@@ -149,6 +162,9 @@ class _EatingAbilityScreenState extends State<EatingAbilityScreen> {
   
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final abilityOptions = _getAbilityOptions(context);
+    
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -169,19 +185,19 @@ class _EatingAbilityScreenState extends State<EatingAbilityScreen> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'Eating Ability',
+                      l10n.eatingAbilityQuestion,
                       style: AppTheme.h2,
                     ),
                   ],
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'What can you currently eat?',
+                  l10n.eatingAbilityQuestion,
                   style: AppTheme.h1,
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'This helps us suggest appropriate food textures',
+                  l10n.eatingAbilitySubtitle,
                   style: AppTheme.body.copyWith(
                     color: AppTheme.colorSubtext,
                   ),
@@ -222,7 +238,7 @@ class _EatingAbilityScreenState extends State<EatingAbilityScreen> {
                 const SizedBox(height: 20),
                 // Continue button
                 PrimaryButton(
-                  label: 'Continue',
+                  label: l10n.continueButton,
                   onPressed: selectedAbility != null ? _continue : null,
                   fullWidth: true,
                 ),

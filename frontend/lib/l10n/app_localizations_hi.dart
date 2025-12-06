@@ -710,4 +710,301 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get pleaseTryAgain => 'कृपया पुन: प्रयास करें';
+
+  @override
+  String get recommendations => 'सिफारिशें';
+
+  @override
+  String get tryAgain => 'पुनः प्रयास करें';
+
+  @override
+  String get goHome => 'होम पर जाएं';
+
+  @override
+  String get goBack => 'वापस जाएं';
+
+  @override
+  String get goToHome => 'होम पर जाएं';
+
+  @override
+  String get foodAddedToDietPlan => 'आहार योजना में जोड़ा गया';
+
+  @override
+  String get failedToAddFood => 'भोजन जोड़ने में विफल';
+
+  @override
+  String get errorMessage => 'त्रुटि';
+
+  @override
+  String get nutritionFacts => 'पोषण तथ्य';
+
+  @override
+  String get category => 'श्रेणी';
+
+  @override
+  String get clearHistory => 'इतिहास साफ़ करें';
+
+  @override
+  String get clearHistoryConfirm => 'क्या आप सुनिश्चित हैं कि आप पूरा इतिहास साफ़ करना चाहते हैं? इस क्रिया को पूर्ववत नहीं किया जा सकता।';
+
+  @override
+  String get clear => 'साफ़ करें';
+
+  @override
+  String get historyCleared => 'इतिहास सफलतापूर्वक साफ़ किया गया';
+
+  @override
+  String get failedToPickImage => 'छवि चुनने में विफल';
+
+  @override
+  String get mealTimesSaved => 'भोजन समय सहेजा गया';
+
+  @override
+  String get googleSignUpComingSoon => 'Google साइन अप जल्द आ रहा है';
+
+  @override
+  String get googleSignInComingSoon => 'Google साइन इन जल्द आ रहा है';
+
+  @override
+  String get failedToLoadHistory => 'इतिहास लोड करने में विफल';
+
+  @override
+  String get progressTracking => 'प्रगति ट्रैकिंग';
+
+  @override
+  String get logProgress => 'प्रगति लॉग करें';
+
+  @override
+  String get addFirstEntry => 'पहली प्रविष्टि जोड़ें';
+
+  @override
+  String get addEntry => 'प्रविष्टि जोड़ें';
+
+  @override
+  String get progressLoggedSuccess => 'प्रगति सफलतापूर्वक लॉग की गई';
+
+  @override
+  String get failedToAddEntry => 'प्रविष्टि जोड़ने में विफल';
+
+  @override
+  String get enterValidScore => 'कृपया एक मान्य स्कोर दर्ज करें (0-100)';
+
+  @override
+  String get profileSavedSuccess => 'प्रोफाइल सफलतापूर्वक सहेजी गई';
+
+  @override
+  String get failedToSaveProfile => 'प्रोफाइल सहेजने में विफल। अपना कनेक्शन जांचें।';
+
+  @override
+  String get foodRemovedFromPlan => 'आहार योजना से भोजन हटाया गया';
+
+  @override
+  String get mealReminders => 'भोजन अनुस्मारक';
+
+  @override
+  String get mealNotifications => 'भोजन सूचनाएं';
+
+  @override
+  String get healthTipNotifications => 'स्वास्थ्य सुझाव';
+
+  @override
+  String get reminderNotifications => 'अनुस्मारक';
+
+  @override
+  String get heightWeightQuestion => 'आपकी ऊंचाई और वजन क्या है?';
+
+  @override
+  String get heightWeightSubtitle => 'यह हमें आपकी पोषण संबंधी आवश्यकताओं की गणना करने में मदद करता है';
+
+  @override
+  String get heightLabel => 'ऊंचाई (सेमी)';
+
+  @override
+  String get weightLabel => 'वजन (किग्रा)';
+
+  @override
+  String get bmiAlert => 'BMI अलर्ट';
+
+  @override
+  String get yourBMI => 'आपका BMI';
+
+  @override
+  String get bmiCategory => 'श्रेणी';
+
+  @override
+  String get underweight => 'कम वजन';
+
+  @override
+  String get normal => 'सामान्य';
+
+  @override
+  String get overweight => 'अधिक वजन';
+
+  @override
+  String get obese => 'मोटापा';
+
+  @override
+  String get underweightMessage => 'आपका BMI इंगित करता है कि आपका वजन कम हो सकता है। हमारी पोषण योजना स्वस्थ वजन बढ़ाने और पोषक तत्वों से भरपूर खाद्य पदार्थों पर ध्यान केंद्रित करेगी।';
+
+  @override
+  String get overweightMessage => 'आपका BMI इंगित करता है कि आपका वजन अधिक हो सकता है। हमारी पोषण योजना आपके उपचार का समर्थन करते हुए स्वस्थ वजन प्राप्त करने में मदद करने के लिए तैयार की जाएगी।';
+
+  @override
+  String get iUnderstood => 'मैं समझ गया';
+
+  @override
+  String get pleaseEnterValidHeightWeight => 'कृपया मान्य ऊंचाई और वजन दर्ज करें';
+
+  @override
+  String get addedAllergies => 'जोड़ा गया';
+
+  @override
+  String get understoodInput => 'समझ गया';
+
+  @override
+  String get importantNotice => 'महत्वपूर्ण सूचना';
+
+  @override
+  String get nausea => 'मतली';
+
+  @override
+  String get fatigue => 'थकान';
+
+  @override
+  String get lossOfAppetite => 'भूख न लगना';
+
+  @override
+  String get constipation => 'कब्ज';
+
+  @override
+  String get diarrhea => 'दस्त';
+
+  @override
+  String get understandSymptoms => 'मैं समझता हूं कि मेरे लक्षण मेरी योजना को व्यक्तिगत बनाने में मदद करेंगे';
+
+  @override
+  String get bladderCancer => 'मूत्राशय कैंसर';
+
+  @override
+  String get thyroidCancer => 'थायराइड कैंसर';
+
+  @override
+  String get skinCancer => 'त्वचा कैंसर';
+
+  @override
+  String get bloodCancer => 'रक्त कैंसर';
+
+  @override
+  String get otherCancerType => 'अन्य (अपना कैंसर प्रकार टाइप करें)';
+
+  @override
+  String get enterCancerType => 'कैंसर प्रकार दर्ज करें...';
+
+  @override
+  String get vomiting => 'उल्टी';
+
+  @override
+  String get dairy => 'डेयरी / लैक्टोज';
+
+  @override
+  String get dairySubtitle => 'दूध, पनीर, दही';
+
+  @override
+  String get gluten => 'ग्लूटेन';
+
+  @override
+  String get glutenSubtitle => 'गेहूं, जौ, राई';
+
+  @override
+  String get nuts => 'मेवे';
+
+  @override
+  String get nutsSubtitle => 'मूंगफली, ट्री नट्स';
+
+  @override
+  String get soy => 'सोया';
+
+  @override
+  String get soySubtitle => 'सोयाबीन उत्पाद';
+
+  @override
+  String get eggs => 'अंडे';
+
+  @override
+  String get eggsSubtitle => 'सभी अंडा उत्पाद';
+
+  @override
+  String get seafood => 'समुद्री भोजन';
+
+  @override
+  String get seafoodSubtitle => 'मछली, शेलफिश';
+
+  @override
+  String get redMeat => 'लाल मांस';
+
+  @override
+  String get redMeatSubtitle => 'बीफ, पोर्क, लैम्ब';
+
+  @override
+  String get poultry => 'मुर्गी';
+
+  @override
+  String get poultrySubtitle => 'चिकन, टर्की';
+
+  @override
+  String get eatingAbilityQuestion => 'आपकी खाने की क्षमता कैसी है?';
+
+  @override
+  String get eatingAbilitySubtitle => 'यह हमें भाग के आकार और खाद्य बनावट को समायोजित करने में मदद करता है';
+
+  @override
+  String get normalEating => 'सामान्य';
+
+  @override
+  String get normalEatingDesc => 'नियमित भोजन खा सकते हैं';
+
+  @override
+  String get reducedEating => 'कम';
+
+  @override
+  String get reducedEatingDesc => 'छोटे भाग खा रहे हैं';
+
+  @override
+  String get softFoodsOnly => 'केवल नरम भोजन';
+
+  @override
+  String get softFoodsOnlyDesc => 'ठोस भोजन में कठिनाई';
+
+  @override
+  String get liquidsOnly => 'केवल तरल पदार्थ';
+
+  @override
+  String get liquidsOnlyDesc => 'केवल तरल पदार्थ ले सकते हैं';
+
+  @override
+  String get cannotEat => 'नहीं खा सकते';
+
+  @override
+  String get cannotEatDesc => 'खाने या पीने में असमर्थ';
+
+  @override
+  String get emergencyNotice => 'महत्वपूर्ण सूचना';
+
+  @override
+  String get cannotEatWarning => 'यदि आप खा या पी नहीं सकते हैं, तो कृपया तुरंत अपने स्वास्थ्य सेवा प्रदाता से संपर्क करें।';
+
+  @override
+  String get emergencyContacts => 'आपातकालीन संपर्क:';
+
+  @override
+  String get nationalHelpline => 'राष्ट्रीय कैंसर हेल्पलाइन: 1800-11-4455';
+
+  @override
+  String get localER => 'स्थानीय आपातकालीन: 108';
+
+  @override
+  String get continueAnyway => 'फिर भी जारी रखें';
+
+  @override
+  String get appTitle => 'OncoNutri+';
 }

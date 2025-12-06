@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../models/intake_data.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/searchable_list.dart';
 import '../../widgets/ui_components.dart';
 import '../../l10n/app_localizations.dart';
+import '../../providers/theme_provider.dart';
 import 'allergies_screen.dart';
 
 class SymptomsScreen extends StatefulWidget {
@@ -23,32 +25,32 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
     return [
       MultiSelectOption(
         id: 'nausea',
-        label: 'Nausea',
+        label: l10n.nausea,
         icon: Icon(Icons.sick, color: AppTheme.primaryColor(context), size: 36),
       ),
       MultiSelectOption(
         id: 'vomiting',
-        label: 'Vomiting',
+        label: l10n.vomiting,
         icon: Icon(Icons.waves, color: AppTheme.primaryColor(context), size: 36),
       ),
       MultiSelectOption(
         id: 'diarrhea',
-        label: 'Diarrhea',
+        label: l10n.diarrhea,
         icon: Icon(Icons.warning, color: AppTheme.colorWarning, size: 36),
       ),
       MultiSelectOption(
         id: 'constipation',
-        label: 'Constipation',
+        label: l10n.constipation,
         icon: Icon(Icons.block, color: AppTheme.colorDanger, size: 36),
       ),
       MultiSelectOption(
         id: 'fatigue',
-        label: 'Fatigue',
+        label: l10n.fatigue,
         icon: Icon(Icons.battery_0_bar, color: AppTheme.subtextColor(context), size: 36),
       ),
       MultiSelectOption(
         id: 'loss_appetite',
-        label: 'Loss of Appetite',
+        label: l10n.lossOfAppetite,
         icon: Icon(Icons.no_meals, color: AppTheme.colorDanger, size: 36),
       ),
       MultiSelectOption(
@@ -125,6 +127,9 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
   
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = themeProvider.isDarkMode;
+    
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -143,26 +148,33 @@ class _SymptomsScreenState extends State<SymptomsScreen> {
                     Row(
                       children: [
                         IconButton(
-                          icon: const Icon(Icons.arrow_back),
+                          icon: Icon(
+                            Icons.arrow_back,
+                            color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                          ),
                           onPressed: () => Navigator.pop(context),
                         ),
                         const SizedBox(width: 8),
                         Text(
                           'Symptoms',
-                          style: AppTheme.h2,
+                          style: AppTheme.h2.copyWith(
+                            color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 16),
                     Text(
                       AppLocalizations.of(context)!.symptomsQuestion,
-                      style: AppTheme.h1,
+                      style: AppTheme.h1.copyWith(
+                        color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       AppLocalizations.of(context)!.symptomsSubtitle,
                       style: AppTheme.body.copyWith(
-                        color: AppTheme.subtextColor(context),
+                        color: isDark ? AppTheme.colorDarkSubtext : AppTheme.subtextColor(context),
                       ),
                     ),
                   ],

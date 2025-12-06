@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/patient_profile.dart';
 import '../routes/app_routes.dart';
 import '../services/api_service.dart';
+import '../l10n/app_localizations.dart';
 
 class PatientProfileScreen extends StatefulWidget {
   const PatientProfileScreen({Key? key}) : super(key: key);
@@ -80,10 +81,10 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> with Single
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
-              children: const [
+              children: [
                 Icon(Icons.check_circle, color: Colors.white),
                 SizedBox(width: 12),
-                Text('Profile saved successfully'),
+                Text(AppLocalizations.of(context)!.profileSavedSuccess),
               ],
             ),
             backgroundColor: Colors.green,
@@ -102,10 +103,10 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> with Single
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Row(
-                children: const [
+                children: [
                   Icon(Icons.error_outline, color: Colors.white),
                   SizedBox(width: 12),
-                  Expanded(child: Text('Failed to save profile. Check your connection.')),
+                  Expanded(child: Text(AppLocalizations.of(context)!.failedToSaveProfile)),
                 ],
               ),
               backgroundColor: Colors.red,
@@ -123,7 +124,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> with Single
               children: [
                 const Icon(Icons.error_outline, color: Colors.white),
                 const SizedBox(width: 12),
-                Expanded(child: Text('Error: ${e.toString()}')),
+                Expanded(child: Text('${AppLocalizations.of(context)!.errorMessage}: ${e.toString()}')),
               ],
             ),
             backgroundColor: Colors.red,
@@ -145,7 +146,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> with Single
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         elevation: 0,
-        title: const Text('Patient Profile'),
+        title: Text(AppLocalizations.of(context)!.patientProfile),
         centerTitle: true,
       ),
       body: SafeArea(

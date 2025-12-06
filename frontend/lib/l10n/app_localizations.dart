@@ -1522,6 +1522,600 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please try again'**
   String get pleaseTryAgain;
+
+  /// No description provided for @recommendations.
+  ///
+  /// In en, this message translates to:
+  /// **'Recommendations'**
+  String get recommendations;
+
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get tryAgain;
+
+  /// No description provided for @goHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Home'**
+  String get goHome;
+
+  /// No description provided for @goBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Back'**
+  String get goBack;
+
+  /// No description provided for @goToHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to Home'**
+  String get goToHome;
+
+  /// No description provided for @foodAddedToDietPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'added to your diet plan'**
+  String get foodAddedToDietPlan;
+
+  /// No description provided for @failedToAddFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add food to diet plan'**
+  String get failedToAddFood;
+
+  /// No description provided for @errorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get errorMessage;
+
+  /// No description provided for @nutritionFacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Nutrition Facts'**
+  String get nutritionFacts;
+
+  /// No description provided for @category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get category;
+
+  /// No description provided for @clearHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear History'**
+  String get clearHistory;
+
+  /// No description provided for @clearHistoryConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to clear all history? This action cannot be undone.'**
+  String get clearHistoryConfirm;
+
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// No description provided for @historyCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'History cleared successfully'**
+  String get historyCleared;
+
+  /// No description provided for @failedToPickImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to pick image'**
+  String get failedToPickImage;
+
+  /// No description provided for @mealTimesSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal times saved'**
+  String get mealTimesSaved;
+
+  /// No description provided for @googleSignUpComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Sign Up coming soon'**
+  String get googleSignUpComingSoon;
+
+  /// No description provided for @googleSignInComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Sign In coming soon'**
+  String get googleSignInComingSoon;
+
+  /// No description provided for @failedToLoadHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load history'**
+  String get failedToLoadHistory;
+
+  /// No description provided for @progressTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress Tracking'**
+  String get progressTracking;
+
+  /// No description provided for @logProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Log Progress'**
+  String get logProgress;
+
+  /// No description provided for @addFirstEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Add First Entry'**
+  String get addFirstEntry;
+
+  /// No description provided for @addEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Entry'**
+  String get addEntry;
+
+  /// No description provided for @progressLoggedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress logged successfully'**
+  String get progressLoggedSuccess;
+
+  /// No description provided for @failedToAddEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add entry'**
+  String get failedToAddEntry;
+
+  /// No description provided for @enterValidScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid score (0-100)'**
+  String get enterValidScore;
+
+  /// No description provided for @profileSavedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile saved successfully'**
+  String get profileSavedSuccess;
+
+  /// No description provided for @failedToSaveProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save profile. Check your connection.'**
+  String get failedToSaveProfile;
+
+  /// No description provided for @foodRemovedFromPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Food removed from diet plan'**
+  String get foodRemovedFromPlan;
+
+  /// No description provided for @mealReminders.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal Reminders'**
+  String get mealReminders;
+
+  /// No description provided for @mealNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Meal Notifications'**
+  String get mealNotifications;
+
+  /// No description provided for @healthTipNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Tips'**
+  String get healthTipNotifications;
+
+  /// No description provided for @reminderNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders'**
+  String get reminderNotifications;
+
+  /// No description provided for @heightWeightQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s your height and weight?'**
+  String get heightWeightQuestion;
+
+  /// No description provided for @heightWeightSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This helps us calculate your nutritional needs'**
+  String get heightWeightSubtitle;
+
+  /// No description provided for @heightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Height (cm)'**
+  String get heightLabel;
+
+  /// No description provided for @weightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Weight (kg)'**
+  String get weightLabel;
+
+  /// No description provided for @bmiAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'BMI Alert'**
+  String get bmiAlert;
+
+  /// No description provided for @yourBMI.
+  ///
+  /// In en, this message translates to:
+  /// **'Your BMI'**
+  String get yourBMI;
+
+  /// No description provided for @bmiCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get bmiCategory;
+
+  /// No description provided for @underweight.
+  ///
+  /// In en, this message translates to:
+  /// **'Underweight'**
+  String get underweight;
+
+  /// No description provided for @normal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get normal;
+
+  /// No description provided for @overweight.
+  ///
+  /// In en, this message translates to:
+  /// **'Overweight'**
+  String get overweight;
+
+  /// No description provided for @obese.
+  ///
+  /// In en, this message translates to:
+  /// **'Obese'**
+  String get obese;
+
+  /// No description provided for @underweightMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your BMI indicates you may be underweight. Our nutrition plan will focus on healthy weight gain and nutrient-dense foods.'**
+  String get underweightMessage;
+
+  /// No description provided for @overweightMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your BMI indicates you may be overweight. Our nutrition plan will be tailored to help you achieve a healthier weight while supporting your treatment.'**
+  String get overweightMessage;
+
+  /// No description provided for @iUnderstood.
+  ///
+  /// In en, this message translates to:
+  /// **'I Understood'**
+  String get iUnderstood;
+
+  /// No description provided for @pleaseEnterValidHeightWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter valid height and weight'**
+  String get pleaseEnterValidHeightWeight;
+
+  /// No description provided for @addedAllergies.
+  ///
+  /// In en, this message translates to:
+  /// **'Added'**
+  String get addedAllergies;
+
+  /// No description provided for @understoodInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Understood'**
+  String get understoodInput;
+
+  /// No description provided for @importantNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Important Notice'**
+  String get importantNotice;
+
+  /// No description provided for @nausea.
+  ///
+  /// In en, this message translates to:
+  /// **'Nausea'**
+  String get nausea;
+
+  /// No description provided for @fatigue.
+  ///
+  /// In en, this message translates to:
+  /// **'Fatigue'**
+  String get fatigue;
+
+  /// No description provided for @lossOfAppetite.
+  ///
+  /// In en, this message translates to:
+  /// **'Loss of Appetite'**
+  String get lossOfAppetite;
+
+  /// No description provided for @constipation.
+  ///
+  /// In en, this message translates to:
+  /// **'Constipation'**
+  String get constipation;
+
+  /// No description provided for @diarrhea.
+  ///
+  /// In en, this message translates to:
+  /// **'Diarrhea'**
+  String get diarrhea;
+
+  /// No description provided for @understandSymptoms.
+  ///
+  /// In en, this message translates to:
+  /// **'I understand my symptoms will help personalize my plan'**
+  String get understandSymptoms;
+
+  /// No description provided for @bladderCancer.
+  ///
+  /// In en, this message translates to:
+  /// **'Bladder Cancer'**
+  String get bladderCancer;
+
+  /// No description provided for @thyroidCancer.
+  ///
+  /// In en, this message translates to:
+  /// **'Thyroid Cancer'**
+  String get thyroidCancer;
+
+  /// No description provided for @skinCancer.
+  ///
+  /// In en, this message translates to:
+  /// **'Skin Cancer'**
+  String get skinCancer;
+
+  /// No description provided for @bloodCancer.
+  ///
+  /// In en, this message translates to:
+  /// **'Blood Cancer'**
+  String get bloodCancer;
+
+  /// No description provided for @otherCancerType.
+  ///
+  /// In en, this message translates to:
+  /// **'Other (Type your cancer type)'**
+  String get otherCancerType;
+
+  /// No description provided for @enterCancerType.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter cancer type...'**
+  String get enterCancerType;
+
+  /// No description provided for @vomiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Vomiting'**
+  String get vomiting;
+
+  /// No description provided for @dairy.
+  ///
+  /// In en, this message translates to:
+  /// **'Dairy / Lactose'**
+  String get dairy;
+
+  /// No description provided for @dairySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Milk, cheese, yogurt'**
+  String get dairySubtitle;
+
+  /// No description provided for @gluten.
+  ///
+  /// In en, this message translates to:
+  /// **'Gluten'**
+  String get gluten;
+
+  /// No description provided for @glutenSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Wheat, barley, rye'**
+  String get glutenSubtitle;
+
+  /// No description provided for @nuts.
+  ///
+  /// In en, this message translates to:
+  /// **'Nuts'**
+  String get nuts;
+
+  /// No description provided for @nutsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Peanuts, tree nuts'**
+  String get nutsSubtitle;
+
+  /// No description provided for @soy.
+  ///
+  /// In en, this message translates to:
+  /// **'Soy'**
+  String get soy;
+
+  /// No description provided for @soySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Soybean products'**
+  String get soySubtitle;
+
+  /// No description provided for @eggs.
+  ///
+  /// In en, this message translates to:
+  /// **'Eggs'**
+  String get eggs;
+
+  /// No description provided for @eggsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All egg products'**
+  String get eggsSubtitle;
+
+  /// No description provided for @seafood.
+  ///
+  /// In en, this message translates to:
+  /// **'Seafood'**
+  String get seafood;
+
+  /// No description provided for @seafoodSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fish, shellfish'**
+  String get seafoodSubtitle;
+
+  /// No description provided for @redMeat.
+  ///
+  /// In en, this message translates to:
+  /// **'Red Meat'**
+  String get redMeat;
+
+  /// No description provided for @redMeatSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Beef, pork, lamb'**
+  String get redMeatSubtitle;
+
+  /// No description provided for @poultry.
+  ///
+  /// In en, this message translates to:
+  /// **'Poultry'**
+  String get poultry;
+
+  /// No description provided for @poultrySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chicken, turkey'**
+  String get poultrySubtitle;
+
+  /// No description provided for @eatingAbilityQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'How is your eating ability?'**
+  String get eatingAbilityQuestion;
+
+  /// No description provided for @eatingAbilitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This helps us adjust portion sizes and food textures'**
+  String get eatingAbilitySubtitle;
+
+  /// No description provided for @normalEating.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get normalEating;
+
+  /// No description provided for @normalEatingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Can eat regular foods'**
+  String get normalEatingDesc;
+
+  /// No description provided for @reducedEating.
+  ///
+  /// In en, this message translates to:
+  /// **'Reduced'**
+  String get reducedEating;
+
+  /// No description provided for @reducedEatingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Eating smaller portions'**
+  String get reducedEatingDesc;
+
+  /// No description provided for @softFoodsOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Soft Foods Only'**
+  String get softFoodsOnly;
+
+  /// No description provided for @softFoodsOnlyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Difficulty with solid foods'**
+  String get softFoodsOnlyDesc;
+
+  /// No description provided for @liquidsOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Liquids Only'**
+  String get liquidsOnly;
+
+  /// No description provided for @liquidsOnlyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Can only consume liquids'**
+  String get liquidsOnlyDesc;
+
+  /// No description provided for @cannotEat.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot Eat'**
+  String get cannotEat;
+
+  /// No description provided for @cannotEatDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to eat or drink'**
+  String get cannotEatDesc;
+
+  /// No description provided for @emergencyNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Important Notice'**
+  String get emergencyNotice;
+
+  /// No description provided for @cannotEatWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'If you cannot eat or drink, please contact your healthcare provider immediately.'**
+  String get cannotEatWarning;
+
+  /// No description provided for @emergencyContacts.
+  ///
+  /// In en, this message translates to:
+  /// **'Emergency Contacts:'**
+  String get emergencyContacts;
+
+  /// No description provided for @nationalHelpline.
+  ///
+  /// In en, this message translates to:
+  /// **'National Cancer Helpline: 1800-11-4455'**
+  String get nationalHelpline;
+
+  /// No description provided for @localER.
+  ///
+  /// In en, this message translates to:
+  /// **'Local Emergency: 108'**
+  String get localER;
+
+  /// No description provided for @continueAnyway.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue Anyway'**
+  String get continueAnyway;
+
+  /// No description provided for @appTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'OncoNutri+'**
+  String get appTitle;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

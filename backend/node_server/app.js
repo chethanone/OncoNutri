@@ -1,6 +1,9 @@
 const express = require('express');
 const cors = require('cors');
-require('dotenv').config();
+const path = require('path');
+
+// Load environment variables from root .env file
+require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -24,6 +27,10 @@ try {
 } catch(e) { console.log('Patients route error:', e.message); }
 
 try {
+    app.use('/api/patient', require('./routes/patientRoutes'));
+} catch(e) { console.log('Patient route error:', e.message); }
+
+try {
     app.use('/api/recommendations', require('./routes/recommendations'));
 } catch(e) { console.log('Recommendations route error:', e.message); }
 
@@ -34,6 +41,10 @@ try {
 try {
     app.use('/api/diet', require('./routes/dietRoutes'));
 } catch(e) { console.log('Diet route error:', e.message); }
+
+try {
+    app.use('/api/videos', require('./routes/videoRoutes'));
+} catch(e) { console.log('Video route error:', e.message); }
 
 // Fallback dashboard route
 app.get('/api/dashboard/overview', (req, res) => {

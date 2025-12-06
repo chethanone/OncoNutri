@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/app_theme.dart';
+import '../providers/theme_provider.dart';
+import 'package:provider/provider.dart';
 
 /// SearchableList - For cancer types and other searchable options
 class SearchableList extends StatefulWidget {
@@ -160,6 +162,9 @@ class MultiSelectCardGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = themeProvider.isDarkMode;
+    
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -181,14 +186,16 @@ class MultiSelectCardGrid extends StatelessWidget {
             duration: AppTheme.fadeInDuration,
             decoration: BoxDecoration(
               color: isSelected
-                  ? const Color(0xFFFFF7F4)
+                  ? (isDark ? AppTheme.primaryColor(context).withOpacity(0.2) : const Color(0xFFFFF7F4))
                   : AppTheme.surfaceColor(context),
               border: Border.all(
                 color: isSelected ? AppTheme.primaryColor(context) : AppTheme.borderColor(context),
                 width: isSelected ? 2 : 1,
               ),
               borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-              boxShadow: isSelected ? AppTheme.selectedShadow : AppTheme.defaultShadow,
+              boxShadow: (isSelected && !isDark) 
+                  ? AppTheme.selectedShadow 
+                  : (!isDark ? AppTheme.defaultShadow : []),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -205,7 +212,10 @@ class MultiSelectCardGrid extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: Text(
                     option.label,
-                    style: AppTheme.bodyMedium.copyWith(fontSize: 14),
+                    style: AppTheme.bodyMedium.copyWith(
+                      fontSize: 14,
+                      color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                    ),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,

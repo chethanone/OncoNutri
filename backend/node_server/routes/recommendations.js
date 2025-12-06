@@ -1,6 +1,8 @@
 const express = require('express');
 const axios = require('axios');
 const router = express.Router();
+const { pool } = require('../config/database');
+const { authenticateToken } = require('../utils/authMiddleware');
 
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:8000';
 
@@ -22,9 +24,92 @@ function convertAgeRange(ageRange) {
 }
 
 // Get food recommendations
-router.post('/', async (req, res) => {
+router.post('/', authenticateToken, async (req, res) => {
     try {
+        console.log('\n🎯 ========== NEW RECOMMENDATION REQUEST ==========');
         console.log('📥 Received intake data:', JSON.stringify(req.body, null, 2));
+        console.log('🔑 User ID:', req.user?.userId);
+        
+        const userId = req.user?.userId;
+        
+        // Save intake data to patient profile if user is authenticated
+        if (userId) {
+            try {
+                const {
+                    age_range,
+                    cancer_type,
+                    treatment_stage,
+                    dietary_preference,
+                    allergies,
+                    symptoms,
+                    water_intake,
+                    appetite_level,
+                    eating_ability,
+                    activity_level,
+                    weight,
+                    height,
+                    gender
+                } = req.body;
+
+                console.log('📋 Extracted values for DB:');
+                console.log('   - cancer_type:', cancer_type);
+                console.log('   - treatment_stage:', treatment_stage);
+                console.log('   - age_range:', age_range);
+                console.log('   - dietary_preference:', dietary_preference);
+
+                // Check if profile exists
+                const existing = await pool.query(
+                    'SELECT * FROM patient_profiles WHERE user_id = $1',
+                    [userId]
+                );
+
+                const ageValue = age_range ? parseInt(age_range.split('-')[0]) : null;
+
+                if (existing.rows.length > 0) {
+                    // Update existing profile - only update columns that exist in DB
+                    console.log('🔄 Updating profile with:', {
+                        age: ageValue,
+                        cancer_type,
+                        stage: treatment_stage,
+                        dietary_preference,
+                        weight
+                    });
+                    
+                    const result = await pool.query(
+                        `UPDATE patient_profiles 
+                         SET age = $2,
+                             cancer_type = $3,
+                             stage = $4,
+                             dietary_preference = $5,
+                             allergies = $6,
+                             weight = $7,
+                             updated_at = NOW()
+                         WHERE user_id = $1
+                         RETURNING cancer_type, stage, dietary_preference, age`,
+                        [userId, ageValue, cancer_type, treatment_stage,
+                         dietary_preference,
+                         Array.isArray(allergies) ? allergies.join(', ') : allergies,
+                         weight]
+                    );
+                    console.log('✅ Updated patient profile for user:', userId, 'New values:', result.rows[0]);
+                } else {
+                    // Create new profile - only use columns that exist in DB
+                    await pool.query(
+                        `INSERT INTO patient_profiles (
+                           user_id, age, cancer_type, stage, dietary_preference,
+                           allergies, weight, created_at, updated_at
+                         ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())`,
+                        [userId, ageValue, cancer_type, treatment_stage, dietary_preference,
+                         Array.isArray(allergies) ? allergies.join(', ') : allergies,
+                         weight]
+                    );
+                    console.log('✅ Created patient profile for user:', userId);
+                }
+            } catch (dbError) {
+                console.error('⚠️ Failed to save patient profile:', dbError.message);
+                // Continue even if profile save fails
+            }
+        }
         
         // Transform frontend data to ML service format
         const mlPayload = {

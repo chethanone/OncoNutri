@@ -8,6 +8,12 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import json
+import os
+from dotenv import load_dotenv
+
+# Load environment variables from root .env file
+env_path = Path(__file__).resolve().parent.parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 from models.recommendation_model import HybridRecommender, NutrientScorer
 from utils.logger import setup_logger

@@ -328,7 +328,41 @@ def get_expanded_recommendations(patient_profile: Dict, num_recommendations: int
     if num_fooddata > 0:
         food_df, _ = load_fooddata_central()
         
-        # STRICT dietary filtering based on preference
+        # FILTER 1: Apply allergen filtering to FoodData Central
+        if allergies:
+            # Same allergen expansion map as used for curated foods
+            allergen_map = {
+                'dairy': ['milk', 'dairy', 'cream', 'butter', 'ghee', 'cheese', 'paneer', 'curd', 'yogurt', 'dahi', 'khoya', 'mozzarella', 'cheddar', 'ricotta', 'lassi', 'raita'],
+                'milk': ['milk', 'dairy', 'cream', 'butter', 'ghee'],
+                'cheese': ['cheese', 'paneer', 'cheddar', 'mozzarella', 'ricotta'],
+                'yogurt': ['yogurt', 'curd', 'dahi', 'lassi', 'raita'],
+                'eggs': ['egg', 'omelette', 'scrambled', 'boiled egg', 'fried egg', 'omelet'],
+                'egg': ['egg', 'omelette', 'scrambled', 'boiled egg', 'fried egg', 'omelet'],
+                'nuts': ['nut', 'almond', 'walnut', 'cashew', 'peanut', 'hazelnut', 'pistachio', 'pecan'],
+                'soy': ['soy', 'tofu', 'tempeh', 'edamame', 'soybean'],
+                'gluten': ['wheat', 'bread', 'pasta', 'noodle', 'roti', 'chapati', 'barley', 'rye', 'semolina', 'maida', 'oat'],
+                'wheat': ['wheat', 'bread', 'pasta', 'noodle', 'roti', 'chapati'],
+                'shellfish': ['shellfish', 'shrimp', 'prawn', 'crab', 'lobster', 'clam', 'mussel', 'oyster'],
+                'seafood': ['fish', 'salmon', 'tuna', 'mackerel', 'shrimp', 'prawn', 'crab', 'lobster', 'shellfish'],
+                'fish': ['fish', 'salmon', 'tuna', 'mackerel', 'cod', 'tilapia'],
+                'red meat': ['beef', 'pork', 'lamb', 'mutton', 'goat'],
+                'poultry': ['chicken', 'turkey', 'duck']
+            }
+            
+            expanded_allergens = []
+            for allergen in allergies:
+                allergen_lower = allergen.lower()
+                if allergen_lower in allergen_map:
+                    expanded_allergens.extend(allergen_map[allergen_lower])
+                else:
+                    expanded_allergens.append(allergen_lower)
+            
+            # Create regex pattern for allergen exclusion
+            allergen_pattern = '|'.join([f'\\b{allergen}\\b' for allergen in expanded_allergens])
+            food_df = food_df[~food_df['description_lower'].str.contains(allergen_pattern, na=False, regex=True)]
+            print(f"After FoodData allergen filter ({allergies} -> {expanded_allergens}): {len(food_df)} foods remain")
+        
+        # FILTER 2: STRICT dietary filtering based on preference
         if dietary_pref == 'Jain':
             # Jain: No meat, fish, eggs, root vegetables (onion, garlic, potato, etc.)
             exclude_pattern = 'meat|chicken|beef|pork|lamb|turkey|fish|salmon|tuna|seafood|shrimp|prawn|crab|lobster|egg|bacon|sausage|ham|bologna|salami|pepperoni|onion|garlic|potato|carrot|beet|radish|ginger|turnip|sloppy joe|meatball|ground|burger|hot dog|hotdog|steak|ribs|chop'

@@ -6,11 +6,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../utils/app_theme.dart';
 import '../widgets/ui_components.dart';
 import '../services/auth_service.dart';
+import '../services/notification_service.dart';
 import '../providers/theme_provider.dart';
 import '../providers/language_provider.dart';
 import '../l10n/app_localizations.dart';
 import 'intake/age_picker_screen.dart';
 import 'login_screen.dart';
+import 'user_history_screen.dart';
+import 'meal_timer_screen.dart';
 import '../models/intake_data.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -25,6 +28,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _userName = 'Add Name';
   String _userEmail = 'Add Email';
   
+  // Notification settings
+  bool _mealNotifications = true;
+  bool _tipsNotifications = true;
+  bool _remindersNotifications = true;
+  
   @override
   void initState() {
     super.initState();
@@ -37,6 +45,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _profileImagePath = prefs.getString('profile_image');
       _userName = prefs.getString('user_name') ?? 'Add Name';
       _userEmail = prefs.getString('user_email') ?? 'Add Email';
+      
+      // Load notification settings
+      _mealNotifications = prefs.getBool('meal_notifications') ?? true;
+      _tipsNotifications = prefs.getBool('tips_notifications') ?? true;
+      _remindersNotifications = prefs.getBool('reminders_notifications') ?? true;
     });
   }
 
@@ -56,6 +69,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() {
           _profileImagePath = image.path;
         });
+        
+        // Log to history
+        await HistoryLogger.logEvent(
+          type: 'profile_update',
+          title: 'Profile Photo Updated',
+          description: 'Changed profile photo',
+        );
         
         if (mounted) {
           final localizations = AppLocalizations.of(context)!;
@@ -79,7 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to pick image: $e'),
+            content: Text('${AppLocalizations.of(context)!.failedToPickImage}: $e'),
             backgroundColor: AppTheme.colorDanger,
           ),
         );
@@ -180,11 +200,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (result != null && result.isNotEmpty) {
+      final oldName = _userName;
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user_name', result);
       setState(() {
         _userName = result;
       });
+      
+      // Log history
+      await HistoryLogger.logEvent(
+        type: 'name_update',
+        title: 'Name Updated',
+        description: 'Changed name from "$oldName" to "$result"',
+      );
     }
   }
 
@@ -225,7 +253,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final localizations = AppLocalizations.of(context)!;
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: isDark ? AppTheme.colorDarkBackground : const Color(0xFFF5F5F5),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -240,14 +268,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF2D2D2D),
+                      color: isDark ? AppTheme.colorDarkText : const Color(0xFF2D2D2D),
                     ),
                   ),
                   Container(
                     width: 44,
                     height: 44,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: isDark ? AppTheme.colorDarkSurface : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
@@ -262,7 +290,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       onPressed: () {
                         _showSettingsBottomSheet();
                       },
-                      color: const Color(0xFF2D2D2D),
+                      color: isDark ? AppTheme.colorDarkText : const Color(0xFF2D2D2D),
                       padding: EdgeInsets.zero,
                     ),
                   ),
@@ -274,7 +302,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Container(
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? AppTheme.colorDarkSurface : Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
@@ -295,7 +323,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             height: 100,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: const Color(0xFF2D2D2D),
+                              color: isDark ? AppTheme.colorDarkPrimary : const Color(0xFF2D2D2D),
                               image: _profileImagePath != null
                                   ? DecorationImage(
                                       image: FileImage(File(_profileImagePath!)),
@@ -341,10 +369,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           Text(
                             _userName,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF2D2D2D),
+                              color: isDark ? AppTheme.colorDarkText : const Color(0xFF2D2D2D),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -371,28 +399,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               // Options
               _buildOptionCard(
-                icon: Icons.restaurant_menu,
-                title: localizations.profileRetakeAssessment,
-                subtitle: localizations.profileRetakeAssessmentDesc,
+                icon: Icons.history,
+                title: 'User History',
+                subtitle: 'View your activity logs and changes',
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => AgePickerScreen(
-                        intakeData: IntakeData(),
-                      ),
+                      builder: (_) => const UserHistoryScreen(),
                     ),
                   );
-                },
-              ),
-              const SizedBox(height: 12),
-
-              _buildOptionCard(
-                icon: Icons.person_outline,
-                title: localizations.profilePersonalDetails,
-                subtitle: localizations.profilePersonalDetailsDesc,
-                onTap: () {
-                  _editName();
                 },
               ),
               const SizedBox(height: 12),
@@ -414,6 +430,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 onTap: () {
                   _showNotificationSettings();
                 },
+              ),
+              const SizedBox(height: 12),
+
+              _buildOptionCard(
+                icon: Icons.dark_mode_outlined,
+                title: 'Dark Mode',
+                subtitle: 'Toggle dark theme for the app',
+                onTap: () {},
+                trailing: Consumer<ThemeProvider>(
+                  builder: (context, themeProvider, child) {
+                    return Switch(
+                      value: themeProvider.isDarkMode,
+                      onChanged: (value) async {
+                        await themeProvider.toggleTheme();
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                value ? 'Dark mode enabled' : 'Light mode enabled',
+                              ),
+                              duration: const Duration(seconds: 2),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      },
+                      activeColor: const Color(0xFF4CAF50),
+                    );
+                  },
+                ),
               ),
               const SizedBox(height: 12),
 
@@ -470,8 +516,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     required VoidCallback onTap,
     Widget? trailing,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Material(
-      color: Colors.white,
+      color: isDark ? AppTheme.colorDarkSurface : Colors.white,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: onTap,
@@ -479,7 +527,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade200),
+            border: Border.all(color: isDark ? AppTheme.colorDarkBorder : Colors.grey.shade200),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Row(
@@ -488,12 +536,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
+                  color: isDark ? AppTheme.colorDarkBackground : const Color(0xFFF5F5F5),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   icon,
-                  color: const Color(0xFF2D2D2D),
+                  color: isDark ? AppTheme.colorDarkText : const Color(0xFF2D2D2D),
                   size: 24,
                 ),
               ),
@@ -504,10 +552,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF2D2D2D),
+                        color: isDark ? AppTheme.colorDarkText : const Color(0xFF2D2D2D),
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -515,7 +563,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       subtitle,
                       style: TextStyle(
                         fontSize: 13,
-                        color: Colors.grey.shade600,
+                        color: isDark ? AppTheme.colorDarkSubtext : Colors.grey.shade600,
                       ),
                     ),
                   ],
@@ -524,7 +572,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               trailing ??
                   Icon(
                     Icons.chevron_right,
-                    color: Colors.grey.shade400,
+                    color: isDark ? AppTheme.colorDarkSubtext : Colors.grey.shade400,
                   ),
             ],
           ),
@@ -537,15 +585,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final localizations = AppLocalizations.of(context)!;
     final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
     final currentLanguage = languageProvider.locale.languageCode;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
         padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        decoration: BoxDecoration(
+          color: isDark ? AppTheme.colorDarkSurface : Colors.white,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -554,7 +603,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
+                color: isDark ? AppTheme.colorDarkBorder : Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -564,39 +613,64 @@ class _ProfileScreenState extends State<ProfileScreen> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF2D2D2D),
+                color: isDark ? AppTheme.colorDarkText : const Color(0xFF2D2D2D),
               ),
             ),
             const SizedBox(height: 24),
             ListTile(
-              leading: const Icon(Icons.language),
-              title: Text(localizations.profileLanguage),
-              subtitle: Text(_getLanguageName(currentLanguage)),
-              trailing: const Icon(Icons.chevron_right),
+              leading: Icon(
+                Icons.language,
+                color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+              ),
+              title: Text(
+                localizations.profileLanguage,
+                style: TextStyle(
+                  color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                ),
+              ),
+              subtitle: Text(
+                _getLanguageName(currentLanguage),
+                style: TextStyle(
+                  color: isDark ? AppTheme.colorDarkSubtext : Colors.grey[600],
+                ),
+              ),
+              trailing: Icon(
+                Icons.chevron_right,
+                color: isDark ? AppTheme.colorDarkSubtext : Colors.grey[400],
+              ),
               onTap: () {
                 Navigator.pop(context);
                 _showLanguageDialog();
               },
             ),
             ListTile(
-              leading: const Icon(Icons.security),
-              title: Text(localizations.settingsPrivacySecurity),
-              trailing: const Icon(Icons.chevron_right),
+              leading: Icon(
+                Icons.alarm,
+                color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+              ),
+              title: Text(
+                'Meal Reminders',
+                style: TextStyle(
+                  color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                ),
+              ),
+              subtitle: Text(
+                'Set notification times',
+                style: TextStyle(
+                  color: isDark ? AppTheme.colorDarkSubtext : Colors.grey[600],
+                ),
+              ),
+              trailing: Icon(
+                Icons.chevron_right,
+                color: isDark ? AppTheme.colorDarkSubtext : Colors.grey[400],
+              ),
               onTap: () {
                 Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${localizations.settingsPrivacySecurity} ${localizations.comingSoon}')),
-                );
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.data_usage),
-              title: Text(localizations.settingsDataManagement),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${localizations.settingsDataManagement} ${localizations.comingSoon}')),
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MealTimerScreen(),
+                  ),
                 );
               },
             ),
@@ -730,7 +804,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     intakeData: IntakeData(),
                   ),
                 ),
-              );
+              ).then((_) async {
+                // Log history when returning from health update
+                await HistoryLogger.logEvent(
+                  type: 'health_update',
+                  title: 'Health Information Updated',
+                  description: 'Updated health assessment and preferences',
+                );
+              });
             },
             child: Text(localizations.profileUpdateNow),
           ),
@@ -741,56 +822,162 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _showNotificationSettings() {
     final localizations = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
+      isScrollControlled: true,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) => Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: isDark ? AppTheme.colorDarkSurface : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: isDark ? AppTheme.colorDarkBorder : Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Text(
-              localizations.settingsNotifications,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF2D2D2D),
+              const SizedBox(height: 20),
+              Text(
+                localizations.settingsNotifications,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? AppTheme.colorDarkText : const Color(0xFF2D2D2D),
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-            SwitchListTile(
-              title: Text(localizations.notificationDailyReminders),
-              subtitle: Text(localizations.notificationDailyRemindersDesc),
-              value: true,
-              onChanged: (value) {},
-            ),
-            SwitchListTile(
-              title: Text(localizations.notificationProgressUpdates),
-              subtitle: Text(localizations.notificationProgressUpdatesDesc),
-              value: true,
-              onChanged: (value) {},
-            ),
-            SwitchListTile(
-              title: Text(localizations.notificationHealthTips),
-              subtitle: Text(localizations.notificationHealthTipsDesc),
-              value: false,
-              onChanged: (value) {},
-            ),
-            const SizedBox(height: 16),
-          ],
+              const SizedBox(height: 24),
+              
+              // Meal Notifications
+              SwitchListTile(
+                title: Text(
+                  'Meal Notifications',
+                  style: TextStyle(
+                    color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                subtitle: Text(
+                  'Receive reminders for breakfast, lunch, and dinner',
+                  style: TextStyle(
+                    color: isDark ? AppTheme.colorDarkSubtext : Colors.grey[600],
+                  ),
+                ),
+                value: _mealNotifications,
+                activeColor: const Color(0xFF4CAF50),
+                onChanged: (value) async {
+                  setModalState(() {
+                    _mealNotifications = value;
+                  });
+                  setState(() {
+                    _mealNotifications = value;
+                  });
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('meal_notifications', value);
+                  
+                  // Cancel or schedule meal notifications based on saved times
+                  final notificationService = NotificationService();
+                  if (value) {
+                    // Check if individual meal times are enabled
+                    final breakfastEnabled = prefs.getBool('breakfast_enabled') ?? true;
+                    final lunchEnabled = prefs.getBool('lunch_enabled') ?? true;
+                    final dinnerEnabled = prefs.getBool('dinner_enabled') ?? true;
+                    
+                    if (breakfastEnabled || lunchEnabled || dinnerEnabled) {
+                      await notificationService.scheduleMealReminders();
+                    }
+                  } else {
+                    // Cancel all meal notifications (IDs 1-6)
+                    for (int i = 1; i <= 6; i++) {
+                      await notificationService.cancelNotification(i);
+                    }
+                  }
+                },
+              ),
+              
+              // Tips Notifications
+              SwitchListTile(
+                title: Text(
+                  'Health Tips',
+                  style: TextStyle(
+                    color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                subtitle: Text(
+                  'Get helpful health and nutrition tips',
+                  style: TextStyle(
+                    color: isDark ? AppTheme.colorDarkSubtext : Colors.grey[600],
+                  ),
+                ),
+                value: _tipsNotifications,
+                activeColor: const Color(0xFF4CAF50),
+                onChanged: (value) async {
+                  setModalState(() {
+                    _tipsNotifications = value;
+                  });
+                  setState(() {
+                    _tipsNotifications = value;
+                  });
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('tips_notifications', value);
+                  
+                  final notificationService = NotificationService();
+                  if (value) {
+                    await notificationService.scheduleHealthTipNotification();
+                  } else {
+                    await notificationService.cancelNotification(20);
+                  }
+                },
+              ),
+              
+              // Reminders Notifications
+              SwitchListTile(
+                title: Text(
+                  'General Reminders',
+                  style: TextStyle(
+                    color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                subtitle: Text(
+                  'Stay on track with wellness reminders',
+                  style: TextStyle(
+                    color: isDark ? AppTheme.colorDarkSubtext : Colors.grey[600],
+                  ),
+                ),
+                value: _remindersNotifications,
+                activeColor: const Color(0xFF4CAF50),
+                onChanged: (value) async {
+                  setModalState(() {
+                    _remindersNotifications = value;
+                  });
+                  setState(() {
+                    _remindersNotifications = value;
+                  });
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setBool('reminders_notifications', value);
+                  
+                  final notificationService = NotificationService();
+                  if (value) {
+                    await notificationService.scheduleDailyProgressReminder();
+                  } else {
+                    await notificationService.cancelNotification(10);
+                  }
+                },
+              ),
+              const SizedBox(height: 16),
+            ],
+          ),
         ),
       ),
     );
@@ -801,7 +988,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(localizations.helpTitle),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF4CAF50).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(
+                Icons.help_outline,
+                color: Color(0xFF4CAF50),
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(localizations.helpTitle),
+          ],
+        ),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -809,25 +1013,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               Text(
                 localizations.helpFaqTitle,
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 12),
-              Text(localizations.helpQuestion1),
-              Text(
-                localizations.helpAnswer1,
-                style: TextStyle(color: Colors.grey.shade700),
-              ),
-              const SizedBox(height: 12),
-              Text(localizations.helpQuestion2),
-              Text(
-                localizations.helpAnswer2,
-                style: TextStyle(color: Colors.grey.shade700),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
               const SizedBox(height: 16),
-              Text(localizations.helpNeedMore),
-              Text(
-                'support@onconutri.com',
-                style: TextStyle(color: Colors.blue.shade700),
+              _buildHelpItem(
+                question: localizations.helpQuestion1,
+                answer: 'A: Tap on Health Information from your profile to update your health details.',
+              ),
+              const SizedBox(height: 12),
+              _buildHelpItem(
+                question: localizations.helpQuestion2,
+                answer: localizations.helpAnswer2,
+              ),
+              const SizedBox(height: 12),
+              _buildHelpItem(
+                question: 'Q: How do I save foods to my diet plan?',
+                answer: 'A: Browse recommendations and tap the bookmark icon to save foods to your personalized diet plan.',
+              ),
+              const SizedBox(height: 12),
+              _buildHelpItem(
+                question: 'Q: How do notifications work?',
+                answer: 'A: Enable notifications in Profile settings to receive meal reminders, progress updates, and health tips.',
               ),
             ],
           ),
@@ -839,6 +1048,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildHelpItem({required String question, required String answer}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          question,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          answer,
+          style: TextStyle(
+            color: Colors.grey.shade700,
+            fontSize: 13,
+          ),
+        ),
+      ],
     );
   }
   void _showAboutDialog() {
@@ -861,7 +1093,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            const Text('OncoNutri+'),
+            Text(AppLocalizations.of(context)!.appTitle),
           ],
         ),
         content: Column(
@@ -870,15 +1102,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Text(
               localizations.aboutVersion,
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Text(localizations.aboutDescription),
-            SizedBox(height: 12),
-            Text(
-              localizations.aboutCopyright,
-              style: TextStyle(fontSize: 12),
-            ),
           ],
         ),
         actions: [

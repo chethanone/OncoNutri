@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../utils/app_theme.dart';
 import '../widgets/ui_components.dart';
 import '../services/auth_service.dart';
+import '../l10n/app_localizations.dart';
 import 'intake/age_picker_screen.dart';
 import 'home_screen.dart';
 
@@ -122,7 +123,38 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 48),
+                const SizedBox(height: 12),
+                // Info message
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.colorPrimary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: AppTheme.colorPrimary.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        size: 20,
+                        color: AppTheme.colorPrimary,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'New user? Create an account below',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppTheme.colorPrimary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
                 // Email field
                 Container(
                   decoration: BoxDecoration(
@@ -236,7 +268,32 @@ class _SignInScreenState extends State<SignInScreen> {
                   label: 'Back',
                   onPressed: () => Navigator.pop(context),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 20),
+                // Sign up link
+                Center(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pop(context); // Go back to login screen
+                      // The login screen should have a sign up button
+                    },
+                    child: RichText(
+                      text: TextSpan(
+                        text: "Don't have an account? ",
+                        style: AppTheme.body.copyWith(color: Colors.black54),
+                        children: [
+                          TextSpan(
+                            text: 'Sign Up',
+                            style: TextStyle(
+                              color: AppTheme.colorPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
                 // Divider
                 Row(
                   children: [
@@ -270,7 +327,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   child: OutlinedButton.icon(
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Google Sign In coming soon')),
+                        SnackBar(content: Text(AppLocalizations.of(context)!.googleSignInComingSoon)),
                       );
                     },
                     icon: const Icon(Icons.g_mobiledata, size: 32, color: Colors.black87),

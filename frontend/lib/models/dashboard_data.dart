@@ -23,6 +23,37 @@ class DashboardData {
       profile: ProfileSummary.fromJson(json['profile']),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'overview': {
+        'dietPlanStatus': overview.dietPlanStatus,
+        'progressPercentage': overview.progressPercentage,
+        'hasDietPlan': overview.hasDietPlan,
+        'totalProgressEntries': overview.totalProgressEntries,
+        'lastEntryDate': overview.lastEntryDate,
+        'totalRecommendedFoods': overview.totalRecommendedFoods,
+        'lastRecommendationDate': overview.lastRecommendationDate,
+      },
+      'recommendations': recommendations.map((rec) => {
+        'name': rec.name,
+        'score': rec.score,
+        'image_url': rec.imageUrl,
+        'benefits': rec.benefits,
+        'food_type': rec.foodType,
+      }).toList(),
+      'tips': tips.map((tip) => {
+        'icon': tip.icon,
+        'title': tip.title,
+        'description': tip.description,
+      }).toList(),
+      'profile': {
+        'cancerType': profile.cancerType,
+        'stage': profile.stage,
+        'age': profile.age,
+      },
+    };
+  }
 }
 
 class DashboardOverview {

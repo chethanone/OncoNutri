@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../models/intake_data.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/ui_components.dart';
 import '../../l10n/app_localizations.dart';
+import '../../providers/theme_provider.dart';
 import 'height_weight_screen.dart';
 
 class AgePickerScreen extends StatefulWidget {
@@ -49,8 +51,11 @@ class _AgePickerScreenState extends State<AgePickerScreen> {
   
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = themeProvider.isDarkMode;
+    
     return Scaffold(
-      backgroundColor: AppTheme.colorBackground,
+      backgroundColor: isDark ? AppTheme.colorDarkBackground : AppTheme.colorBackground,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppTheme.horizontalPadding),
@@ -65,15 +70,15 @@ class _AgePickerScreenState extends State<AgePickerScreen> {
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: AppTheme.colorSurface,
+                      color: isDark ? AppTheme.colorDarkSurface : AppTheme.colorSurface,
                       borderRadius: BorderRadius.circular(12),
-                      boxShadow: AppTheme.defaultShadow,
+                      boxShadow: isDark ? [] : AppTheme.defaultShadow,
                     ),
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back, size: 20),
                       onPressed: () => Navigator.pop(context),
                       padding: EdgeInsets.zero,
-                      color: AppTheme.colorText,
+                      color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
                     ),
                   ),
                 ],
@@ -83,14 +88,14 @@ class _AgePickerScreenState extends State<AgePickerScreen> {
               Text(
                 AppLocalizations.of(context)!.ageQuestion,
                 style: AppTheme.h1.copyWith(
-                  color: AppTheme.colorText,
+                  color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
                 ),
               ),
               const SizedBox(height: 12),
               Text(
                 AppLocalizations.of(context)!.ageSubtitle,
                 style: AppTheme.body.copyWith(
-                  color: AppTheme.colorSubtext,
+                  color: isDark ? AppTheme.colorDarkSubtext : AppTheme.colorSubtext,
                 ),
               ),
               const SizedBox(height: 32),
@@ -118,18 +123,18 @@ class _AgePickerScreenState extends State<AgePickerScreen> {
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? AppTheme.colorSuccess.withOpacity(0.1)
-                              : AppTheme.colorSurface,
+                              ? (isDark ? AppTheme.colorSuccess.withOpacity(0.2) : AppTheme.colorSuccess.withOpacity(0.1))
+                              : (isDark ? AppTheme.colorDarkSurface : AppTheme.colorSurface),
                           borderRadius: BorderRadius.circular(AppTheme.radiusCard),
                           border: Border.all(
                             color: isSelected
                                 ? AppTheme.colorSuccess
-                                : AppTheme.colorBorder,
+                                : (isDark ? AppTheme.colorDarkBorder : AppTheme.colorBorder),
                             width: isSelected ? 2 : 1,
                           ),
-                          boxShadow: isSelected
+                          boxShadow: (isSelected && !isDark)
                               ? AppTheme.selectedShadow
-                              : AppTheme.cardShadow,
+                              : (!isDark ? AppTheme.cardShadow : []),
                         ),
                         child: Row(
                           children: [
@@ -139,14 +144,14 @@ class _AgePickerScreenState extends State<AgePickerScreen> {
                               decoration: BoxDecoration(
                                 color: isSelected
                                     ? AppTheme.colorSuccess
-                                    : AppTheme.colorCream,
+                                    : (isDark ? AppTheme.colorDarkBorder : AppTheme.colorCream),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Icon(
                                 Icons.calendar_today_rounded,
                                 color: isSelected
                                     ? Colors.white
-                                    : AppTheme.colorPrimary,
+                                    : (isDark ? AppTheme.colorDarkText : AppTheme.colorPrimary),
                                 size: 24,
                               ),
                             ),
@@ -155,7 +160,7 @@ class _AgePickerScreenState extends State<AgePickerScreen> {
                               child: Text(
                                 '$ageRange ${AppLocalizations.of(context)!.ageYears}',
                                 style: AppTheme.bodyLarge.copyWith(
-                                  color: AppTheme.colorText,
+                                  color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
                                 ),
                               ),
                             ),
@@ -188,9 +193,9 @@ class _AgePickerScreenState extends State<AgePickerScreen> {
                 child: ElevatedButton(
                   onPressed: selectedAgeRange != null ? _continue : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.colorPrimary,
-                    disabledBackgroundColor: AppTheme.colorBorder,
-                    foregroundColor: Colors.white,
+                    backgroundColor: isDark ? AppTheme.colorDarkPrimary : AppTheme.colorPrimary,
+                    disabledBackgroundColor: isDark ? AppTheme.colorDarkBorder : AppTheme.colorBorder,
+                    foregroundColor: isDark ? AppTheme.colorDarkBackground : Colors.white,
                     elevation: 0,
                     shadowColor: Colors.transparent,
                     shape: RoundedRectangleBorder(
@@ -200,7 +205,7 @@ class _AgePickerScreenState extends State<AgePickerScreen> {
                   child: Text(
                     'Continue',
                     style: AppTheme.bodyLarge.copyWith(
-                      color: Colors.white,
+                      color: isDark ? AppTheme.colorDarkBackground : Colors.white,
                       fontSize: 16,
                     ),
                   ),

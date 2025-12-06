@@ -119,48 +119,48 @@ class NotificationService {
 
     await _scheduleMealReminder(
       id: 1,
-      title: '🍳 Breakfast Time!',
-      body: 'Time for a healthy breakfast! Check your nutrition plan.',
+      title: 'Breakfast Reminder',
+      body: 'Good morning! It\'s time for a nutritious breakfast to start your day.',
       hour: 8,
       minute: 0,
     );
 
     await _scheduleMealReminder(
       id: 2,
-      title: '🍽️ Lunch Reminder',
-      body: 'Don\'t forget your lunch! Stay on track with your diet plan.',
-      hour: 12,
+      title: 'Lunch Reminder',
+      body: 'Time for lunch! Maintain your nutrition plan with a balanced meal.',
+      hour: 13,
       minute: 30,
     );
 
     await _scheduleMealReminder(
       id: 3,
-      title: '🍲 Dinner Time',
-      body: 'Time for dinner! Follow your personalized meal plan.',
+      title: 'Dinner Reminder',
+      body: 'Evening meal time. Follow your personalized nutrition recommendations.',
       hour: 19,
-      minute: 0,
+      minute: 30,
     );
 
     await _scheduleMealReminder(
       id: 4,
-      title: '💧 Hydration Reminder',
-      body: 'Stay hydrated! Drink a glass of water.',
+      title: 'Hydration Reminder',
+      body: 'Stay hydrated throughout the day. Drink a glass of water.',
       hour: 10,
       minute: 0,
     );
 
     await _scheduleMealReminder(
       id: 5,
-      title: '💧 Hydration Reminder',
-      body: 'Remember to drink water for better health!',
+      title: 'Hydration Reminder',
+      body: 'Remember to maintain proper hydration for optimal health.',
       hour: 15,
       minute: 0,
     );
 
     await _scheduleMealReminder(
       id: 6,
-      title: '🍎 Healthy Snack Time',
-      body: 'Time for a healthy snack! Check your recommendations.',
+      title: 'Snack Reminder',
+      body: 'Time for a healthy snack. Check your nutrition recommendations.',
       hour: 16,
       minute: 30,
     );
@@ -212,8 +212,8 @@ class NotificationService {
 
     await _notifications.zonedSchedule(
       10,
-      '📊 Track Your Progress',
-      'Don\'t forget to log your meals and track your daily progress!',
+      'Daily Progress Tracking',
+      'Take a moment to log your meals and review your daily nutrition progress.',
       _nextInstanceOfTime(20, 0),
       NotificationDetails(
         android: AndroidNotificationDetails(
@@ -246,20 +246,20 @@ class NotificationService {
     if (!enableHealthTips) return;
 
     final healthTips = [
-      'Include colorful vegetables in your diet for essential nutrients.',
-      'Stay hydrated! Aim for 8 glasses of water daily.',
-      'Protein is essential for recovery. Include lean proteins in meals.',
-      'Avoid processed foods and opt for whole, natural foods.',
-      'Small, frequent meals can help manage side effects better.',
-      'Green leafy vegetables are packed with cancer-fighting antioxidants.',
-      'Berries are rich in antioxidants that support immune health.',
+      'Incorporate colorful vegetables into your meals for essential vitamins and minerals.',
+      'Maintain proper hydration by drinking 8-10 glasses of water daily.',
+      'Include lean protein sources in your meals to support recovery and maintain strength.',
+      'Choose whole, natural foods over processed options for better nutrition.',
+      'Consider eating smaller, more frequent meals to help manage treatment side effects.',
+      'Green leafy vegetables contain antioxidants that support your immune system.',
+      'Berries are rich in antioxidants and beneficial for overall health.',
     ];
 
     final random = DateTime.now().day % healthTips.length;
 
     await _notifications.zonedSchedule(
       20,
-      '💡 Daily Health Tip',
+      'Daily Nutrition Tip',
       healthTips[random],
       _nextInstanceOfTime(9, 0),
       NotificationDetails(

@@ -26,8 +26,6 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final result = await AuthService.guestLogin();
       if (result['success'] && mounted) {
-        // Mark as not first time
-        await AuthService.setNotFirstTime();
         // Navigate to intake flow (age picker) first
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (_) => const AgePickerScreen()),

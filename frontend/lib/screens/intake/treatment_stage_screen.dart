@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../models/intake_data.dart';
 import '../../utils/app_theme.dart';
 import '../../widgets/ui_components.dart';
 import '../../l10n/app_localizations.dart';
+import '../../providers/theme_provider.dart';
 import 'symptoms_screen.dart';
 
 class TreatmentStageScreen extends StatefulWidget {
@@ -81,6 +83,9 @@ class _TreatmentStageScreenState extends State<TreatmentStageScreen> {
   
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = themeProvider.isDarkMode;
+    
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -96,26 +101,33 @@ class _TreatmentStageScreenState extends State<TreatmentStageScreen> {
                 Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back),
+                      icon: Icon(
+                        Icons.arrow_back,
+                        color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       'Treatment Stage',
-                      style: AppTheme.h2,
+                      style: AppTheme.h2.copyWith(
+                        color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 24),
                 Text(
                   AppLocalizations.of(context)!.treatmentStageQuestion,
-                  style: AppTheme.h1,
+                  style: AppTheme.h1.copyWith(
+                    color: isDark ? AppTheme.colorDarkText : AppTheme.colorText,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   AppLocalizations.of(context)!.treatmentStageSubtitle,
                   style: AppTheme.body.copyWith(
-                    color: AppTheme.subtextColor(context),
+                    color: isDark ? AppTheme.colorDarkSubtext : AppTheme.subtextColor(context),
                   ),
                 ),
                 const SizedBox(height: 32),

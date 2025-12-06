@@ -47,9 +47,6 @@ class _SignupScreenState extends State<SignupScreen> {
           setState(() => _isLoading = false);
           
           if (result['success']) {
-            // Mark as not first time
-            await AuthService.setNotFirstTime();
-            
             // Navigate to intake flow (age picker) for new users
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(builder: (_) => const AgePickerScreen()),
@@ -359,7 +356,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     child: OutlinedButton.icon(
                       onPressed: () {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Google Sign Up coming soon')),
+                          SnackBar(content: Text(AppLocalizations.of(context)!.googleSignUpComingSoon)),
                         );
                       },
                       icon: const Icon(Icons.g_mobiledata, size: 32, color: Colors.black87),

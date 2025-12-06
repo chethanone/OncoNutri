@@ -49,6 +49,7 @@ exports.signup = asyncHandler(async (req, res) => {
       email: user.email,
       language_preference: user.language_preference,
     },
+    hasCompletedIntake: false, // New users haven't completed intake
   });
 });
 
@@ -79,6 +80,13 @@ exports.login = asyncHandler(async (req, res) => {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
 
+  // Check if user has completed intake (has patient profile)
+  const profileResult = await pool.query(
+    'SELECT id FROM patient_profiles WHERE user_id = $1',
+    [user.id]
+  );
+  const hasCompletedIntake = profileResult.rows.length > 0;
+
   // Generate JWT token
   const token = jwt.sign(
     { userId: user.id, email: user.email },
@@ -95,6 +103,7 @@ exports.login = asyncHandler(async (req, res) => {
       email: user.email,
       language_preference: user.language_preference,
     },
+    hasCompletedIntake: hasCompletedIntake,
   });
 });
 

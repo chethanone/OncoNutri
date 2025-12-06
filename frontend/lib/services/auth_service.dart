@@ -67,11 +67,22 @@ class AuthService {
   // Email/Password login
   static Future<Map<String, dynamic>> login(String email, String password) async {
     try {
+      print('🔐 Attempting login to: $_baseUrl/auth/login');
+      print('📧 Email: $email');
+      
       final response = await http.post(
         Uri.parse('$_baseUrl/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'email': email, 'password': password}),
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Connection timeout. Please check your internet connection and ensure the backend server is running.');
+        },
       );
+
+      print('📡 Response status: ${response.statusCode}');
+      print('📦 Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -83,27 +94,55 @@ class AuthService {
         await prefs.setString('user_name', data['user']?['name'] ?? '');
         await prefs.setString('user_email', data['user']?['email'] ?? '');
         
-        // For now, assume intake not completed for new logins
-        await prefs.setBool(_hasCompletedIntakeKey, false);
+        // Get intake completion status from backend response
+        final hasCompletedIntake = data['hasCompletedIntake'] ?? false;
+        // Save it locally for quick access
+        await prefs.setBool(_hasCompletedIntakeKey, hasCompletedIntake);
         
-        return {'success': true, 'data': data, 'hasCompletedIntake': false};
+        print('✅ Login successful!');
+        print('📋 Intake completed: $hasCompletedIntake');
+        return {'success': true, 'data': data, 'hasCompletedIntake': hasCompletedIntake};
       } else {
-        final error = json.decode(response.body);
-        return {'success': false, 'error': error['error'] ?? 'Invalid credentials'};
+        final errorBody = response.body.isNotEmpty ? json.decode(response.body) : {};
+        final errorMessage = errorBody['error'] ?? 'Invalid email or password';
+        print('❌ Login failed: $errorMessage');
+        return {'success': false, 'error': errorMessage};
       }
     } catch (e) {
-      return {'success': false, 'error': e.toString()};
+      print('❌ Login error: $e');
+      String errorMessage = 'Login failed: ${e.toString()}';
+      
+      // Provide user-friendly error messages
+      if (e.toString().contains('SocketException') || e.toString().contains('Connection')) {
+        errorMessage = 'Cannot connect to server. Please check your internet connection.';
+      } else if (e.toString().contains('timeout')) {
+        errorMessage = 'Connection timeout. Please try again.';
+      }
+      
+      return {'success': false, 'error': errorMessage};
     }
   }
 
   // Register new user
   static Future<Map<String, dynamic>> register(String email, String password, String name) async {
     try {
+      print('📝 Attempting registration to: $_baseUrl/auth/register');
+      print('📧 Email: $email');
+      print('👤 Name: $name');
+      
       final response = await http.post(
         Uri.parse('$_baseUrl/auth/register'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'email': email, 'password': password, 'name': name}),
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Connection timeout. Please check your internet connection.');
+        },
       );
+
+      print('📡 Registration response status: ${response.statusCode}');
+      print('📦 Registration response body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = json.decode(response.body);
@@ -114,13 +153,29 @@ class AuthService {
         // Save user name and email
         await prefs.setString('user_name', data['user']?['name'] ?? '');
         await prefs.setString('user_email', data['user']?['email'] ?? '');
+        // New users haven't completed intake
+        await prefs.setBool(_hasCompletedIntakeKey, false);
+        
+        print('✅ Registration successful!');
         return {'success': true, 'data': data};
       } else {
-        final error = json.decode(response.body);
-        return {'success': false, 'error': error['error'] ?? 'Registration failed'};
+        final errorBody = response.body.isNotEmpty ? json.decode(response.body) : {};
+        final errorMessage = errorBody['error'] ?? 'Registration failed';
+        print('❌ Registration failed: $errorMessage');
+        return {'success': false, 'error': errorMessage};
       }
     } catch (e) {
-      return {'success': false, 'error': e.toString()};
+      print('❌ Registration error: $e');
+      String errorMessage = 'Registration failed: ${e.toString()}';
+      
+      // Provide user-friendly error messages
+      if (e.toString().contains('SocketException') || e.toString().contains('Connection')) {
+        errorMessage = 'Cannot connect to server. Please check your internet connection.';
+      } else if (e.toString().contains('timeout')) {
+        errorMessage = 'Connection timeout. Please try again.';
+      }
+      
+      return {'success': false, 'error': errorMessage};
     }
   }
 
