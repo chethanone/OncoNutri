@@ -200,5 +200,63 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getInt(_userIdKey);
   }
+
+  // Refresh token
+  static Future<bool> refreshToken() async {
+    try {
+      final currentToken = await getToken();
+      if (currentToken == null) {
+        print('❌ No token to refresh');
+        return false;
+      }
+
+      print('🔄 Refreshing token...');
+      final response = await http.post(
+        Uri.parse('$_baseUrl/auth/refresh'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'token': currentToken}),
+      ).timeout(
+        const Duration(seconds: 10),
+        onTimeout: () {
+          throw Exception('Token refresh timeout');
+        },
+      );
+
+      print('📡 Refresh response status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_tokenKey, data['token'] ?? '');
+        print('✅ Token refreshed successfully');
+        return true;
+      } else {
+        print('❌ Token refresh failed: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('❌ Token refresh error: $e');
+      return false;
+    }
+  }
+
+  // Validate and refresh token if needed
+  static Future<String?> getValidToken() async {
+    final token = await getToken();
+    if (token == null) return null;
+
+    // Try to refresh the token (backend will validate it)
+    final refreshed = await refreshToken();
+    if (refreshed) {
+      return await getToken();
+    }
+    
+    // If refresh failed, token is truly expired - clear it and return null
+    // This will force the user to re-login
+    print('⚠️ Token expired and cannot be refreshed - user needs to re-login');
+    // DON'T auto-logout here as it causes issues
+    // Just return null to let the app handle it
+    return null;
+  }
 }
 

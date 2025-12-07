@@ -38,7 +38,7 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
   Future<void> _saveFoodToDietPlan(FoodRecommendation food, String mealType) async {
     try {
       // Get auth token
-      final token = await AuthService.getToken();
+      final token = await AuthService.getValidToken();
       
       print('Attempting to save food: ${food.name}');
       print('Auth token: ${token != null ? "Present" : "Missing"}');
@@ -190,7 +190,7 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
       });
 
       // Get auth token
-      final token = await AuthService.getToken();
+      final token = await AuthService.getValidToken();
       print('🔑 Loading recommendations with token: ${token != null ? "Present" : "Missing"}');
 
       final recommendations = await ApiService.getRecommendations(widget.intakeData, token: token);

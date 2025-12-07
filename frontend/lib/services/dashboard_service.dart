@@ -26,7 +26,7 @@ class DashboardService {
         }
       }
       
-      final token = await AuthService.getToken();
+      final token = await AuthService.getValidToken();
       
       if (token == null) {
         print('⚠️ No token found, returning default dashboard');

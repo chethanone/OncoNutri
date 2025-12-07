@@ -72,7 +72,7 @@ class _DietRecommendationScreenState extends State<DietRecommendationScreen> wit
   
   Future<void> _loadUserPreferences() async {
     try {
-      final token = await AuthService.getToken();
+      final token = await AuthService.getValidToken();
       
       // Try to load from backend API first
       if (token != null) {
@@ -172,7 +172,7 @@ class _DietRecommendationScreenState extends State<DietRecommendationScreen> wit
     bool isOffline = false;
     
     try {
-      final token = await AuthService.getToken();
+      final token = await AuthService.getValidToken();
       
       print('📥 Loading saved diet plan...');
       print('🔑 Token: ${token != null ? "Present" : "Missing"}');
@@ -342,7 +342,7 @@ class _DietRecommendationScreenState extends State<DietRecommendationScreen> wit
 
     // Delete from backend if the food has a database ID
     try {
-      final token = await AuthService.getToken();
+      final token = await AuthService.getValidToken();
       if (token != null && food.id != null) {
         final response = await http.delete(
           Uri.parse('${ApiService.apiUrl}/api/diet/plan/${food.id}'),

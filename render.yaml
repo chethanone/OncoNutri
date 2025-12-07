@@ -1,0 +1,62 @@
+services:
+  # Node.js API Server
+  - type: web
+    name: onconutri-node-api
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd backend/node_server && npm install
+    startCommand: cd backend/node_server && node app.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: DB_HOST
+        fromDatabase:
+          name: onconutri-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: onconutri-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: onconutri-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: onconutri-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: onconutri-db
+          property: password
+      - key: JWT_SECRET
+        generateValue: true
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: GOOGLE_API_KEY
+        sync: false
+
+  # FastAPI ML Server
+  - type: web
+    name: onconutri-ml-api
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: cd backend/fastapi_ml && pip install -r requirements.txt
+    startCommand: cd backend/fastapi_ml && uvicorn main:app --host 0.0.0.0 --port 8000
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: PORT
+        value: 8000
+      - key: GOOGLE_API_KEY
+        sync: false
+
+databases:
+  - name: onconutri-db
+    databaseName: onconutri
+    user: onconutri_user
+    plan: free

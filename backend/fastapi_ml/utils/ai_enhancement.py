@@ -7,15 +7,15 @@ import json
 import os
 import requests
 from typing import List, Dict
+from pathlib import Path
 from dotenv import load_dotenv
 
-# Load API key - fix path
-script_dir = os.path.dirname(os.path.abspath(__file__))
-env_path = os.path.join(script_dir, '..', '..', 'datasets', 'cancer_data', '.env')
+# Load environment variables from root .env file (same as main.py)
+env_path = Path(__file__).resolve().parent.parent.parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
 GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
-# Use gemini-2.0-flash (confirmed available and working)
-GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GOOGLE_API_KEY}"
+# Use gemini-2.0-flash-exp (latest experimental model)
+GEMINI_API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key={GOOGLE_API_KEY}"
 
 
 def get_cancer_specific_benefits(food_name: str, cancer_type: str, food_details: Dict, treatment_stage: str = None) -> str:
@@ -32,9 +32,9 @@ def get_cancer_specific_benefits(food_name: str, cancer_type: str, food_details:
         Cancer-specific benefit description tailored to treatment stage
     """
     
-    if not GOOGLE_API_KEY:
-        # Fallback to generic benefits
-        print(f"[AI] WARNING: No Google API key found!")
+    if not GOOGLE_API_KEY or len(GOOGLE_API_KEY.strip()) < 39:
+        # Fallback to generic benefits if no valid API key
+        print(f"[AI] WARNING: No valid Google API key found! Using generic benefits.")
         return f"Nutrient-rich food suitable for {cancer_type} patients"
     
     print(f"[AI] Generating benefit for: {food_name} ({cancer_type} - {treatment_stage or 'general'})")

@@ -336,7 +336,7 @@ Format as a simple list with one suggestion per line, no numbering or bullets.''
     try {
       print('🎥 Loading videos for cancer type: $cancerType');
       
-      final token = await AuthService.getToken();
+      final token = await AuthService.getValidToken();
       if (token == null) {
         print('❌ No auth token found');
         return;

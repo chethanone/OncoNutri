@@ -1,0 +1,39 @@
+# Ignore frontend during backend deployment
+frontend/
+.git/
+.gitignore
+*.md
+LICENSE
+.env
+.env.local
+.env.*.local
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Build artifacts
+build/
+dist/
+*.apk
+*.aab
