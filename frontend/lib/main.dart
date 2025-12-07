@@ -15,10 +15,15 @@ import 'l10n/app_localizations.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize notification service
-  await NotificationService().init();
-  await NotificationService().requestPermissions();
-  await NotificationService().scheduleAllNotifications();
+  try {
+    // Initialize notification service
+    await NotificationService().init();
+    await NotificationService().requestPermissions();
+    await NotificationService().scheduleAllNotifications();
+  } catch (e) {
+    print('Notification initialization error: $e');
+    // Continue even if notifications fail
+  }
   
   runApp(
     MultiProvider(
