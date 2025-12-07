@@ -206,16 +206,19 @@ class _FoodRecommendationsScreenV2State extends State<FoodRecommendationsScreenV
       String userMessage;
       final errorString = e.toString().toLowerCase();
       
-      if (errorString.contains('connection refused') || 
+      if (errorString.contains('waking up') || errorString.contains('taking longer')) {
+        userMessage = 'Server is waking up from sleep mode. This may take 30-60 seconds. Please wait...';
+      } else if (errorString.contains('connection refused') || 
           errorString.contains('failed host lookup') ||
+          errorString.contains('unable to connect') ||
           errorString.contains('socketexception')) {
         userMessage = 'Unable to connect to server. Please check your internet connection and try again.';
-      } else if (errorString.contains('timeout')) {
-        userMessage = 'Connection timed out. Please try again.';
+      } else if (errorString.contains('timeout') || errorString.contains('taking too long')) {
+        userMessage = 'Server is taking longer than usual. It may be waking up from sleep mode. Please try again.';
       } else if (errorString.contains('authentication')) {
         userMessage = 'Session expired. Please log in again.';
       } else {
-        userMessage = 'Unable to load recommendations. Please try again later.';
+        userMessage = 'Unable to load recommendations. Please try again.';
       }
       
       setState(() {

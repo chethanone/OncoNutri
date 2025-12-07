@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:async';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../models/intake_data.dart';
 import '../models/food_recommendation.dart';
@@ -67,24 +69,25 @@ class ApiService {
   }
   
   // Submit Intake Data and Get Recommendations
-  static Future<List<FoodRecommendation>> getRecommendations(IntakeData intakeData, {String? token}) async {
+  static Future<List<FoodRecommendation>> getRecommendations(IntakeData intakeData, {String? token, int retryCount = 0}) async {
     try {
       final headers = {
         'Content-Type': 'application/json',
         if (token != null) 'Authorization': 'Bearer $token',
       };
       
-      print('🔄 Getting recommendations...');
+      print('🔄 Getting recommendations... (Attempt ${retryCount + 1}/3)');
       print('🔑 Token: ${token != null ? "Present" : "Missing"}');
+      print('🌐 Connecting to: $apiUrl/api/recommendations');
       
       final response = await http.post(
         Uri.parse('$apiUrl/api/recommendations'),
         headers: headers,
         body: json.encode(intakeData.toJson()),
       ).timeout(
-        const Duration(seconds: 90),
+        Duration(seconds: retryCount == 0 ? 120 : 60), // First attempt gets more time for server wake-up
         onTimeout: () {
-          throw Exception('Request timeout - the server took too long to respond');
+          throw Exception('Request timeout - the server is taking longer than usual. This may happen when servers are waking up from sleep.');
         },
       );
       
@@ -108,8 +111,29 @@ class ApiService {
         print('Response: ${response.body}');
         throw Exception('Failed to get recommendations: ${response.statusCode}');
       }
+    } on SocketException catch (e) {
+      print('❌ Socket Exception: $e');
+      if (retryCount < 2) {
+        print('🔄 Retrying in 3 seconds...');
+        await Future.delayed(Duration(seconds: 3));
+        return getRecommendations(intakeData, token: token, retryCount: retryCount + 1);
+      }
+      throw Exception('Unable to connect to server. Please check your internet connection and try again.');
+    } on TimeoutException catch (e) {
+      print('❌ Timeout: $e');
+      if (retryCount < 2) {
+        print('🔄 Server may be waking up, retrying in 5 seconds...');
+        await Future.delayed(Duration(seconds: 5));
+        return getRecommendations(intakeData, token: token, retryCount: retryCount + 1);
+      }
+      throw Exception('Server is taking too long to respond. Please try again in a moment.');
     } catch (e) {
       print('❌ Error getting recommendations: $e');
+      if (retryCount < 2 && !e.toString().contains('Authentication')) {
+        print('🔄 Retrying in 3 seconds...');
+        await Future.delayed(Duration(seconds: 3));
+        return getRecommendations(intakeData, token: token, retryCount: retryCount + 1);
+      }
       throw Exception('Network error: $e');
     }
   }
