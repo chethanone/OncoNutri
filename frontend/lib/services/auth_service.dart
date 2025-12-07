@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class AuthService {
-  // UPDATED: Using localhost with ADB port forwarding
-  // Node.js auth server runs on port 5000
-  static const String _baseUrl = 'http://localhost:5000/api';
+  // Cloud deployment on Render
+  // Node.js auth server
+  static const String _baseUrl = 'https://onconutri-node-api.onrender.com/api';
   static const String _tokenKey = 'auth_token';
   static const String _userIdKey = 'user_id';
   static const String _hasCompletedIntakeKey = 'has_completed_intake';

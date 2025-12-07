@@ -5,7 +5,7 @@ class AppConstants {
 
   // API Configuration
   // Using localhost with ADB port forwarding
-  static const String apiBaseUrl = 'http://localhost:8000/api';
+  static const String apiBaseUrl = 'https://onconutri-ml-api.onrender.com/api';
   
   // Storage Keys
   static const String authTokenKey = 'auth_token';

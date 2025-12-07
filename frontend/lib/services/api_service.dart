@@ -9,9 +9,9 @@ import '../screens/user_history_screen.dart';
 
 class ApiService {
   // Node.js backend server (auth, diet plan, patient profiles)
-  // Using ADB reverse port forwarding: adb reverse tcp:5000 tcp:5000
-  static const String baseUrl = 'http://localhost:5000'; 
-  static const String physicalDeviceUrl = 'http://localhost:5000';
+  // Cloud deployment on Render
+  static const String baseUrl = 'https://onconutri-node-api.onrender.com'; 
+  static const String physicalDeviceUrl = 'https://onconutri-node-api.onrender.com';
   
   static String get apiUrl => baseUrl;
   
