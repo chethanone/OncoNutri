@@ -46,8 +46,8 @@
    DB_USER=onconutri_user
    DB_PASSWORD=[from database]
    JWT_SECRET=[generate random 32-char string]
-   YOUTUBE_API_KEY=AIzaSyBpbF-Z3KdsNUkZ6Eg1O2gvZn171lE3xsE
-   GOOGLE_API_KEY=AIzaSyBpbF-Z3KdsNUkZ6Eg1O2gvZn171lE3xsE
+   YOUTUBE_API_KEY=[your-youtube-api-key]
+   GOOGLE_API_KEY=[your-google-api-key]
    ```
 5. Click **"Create Web Service"**
 
@@ -67,7 +67,7 @@
    ```
    PYTHON_VERSION=3.11.0
    PORT=8000
-   GOOGLE_API_KEY=AIzaSyBpbF-Z3KdsNUkZ6Eg1O2gvZn171lE3xsE
+   GOOGLE_API_KEY=[your-google-api-key]
    ```
 5. Click **"Create Web Service"**
 
