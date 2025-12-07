@@ -6,7 +6,7 @@ class GeminiService {
   // For now using placeholder - replace with actual key in local development only
   // API key should be loaded from backend or environment
   // For production, fetch this from your backend API
-  static const String _apiKey = String.fromEnvironment('GOOGLE_API_KEY', defaultValue: 'AIzaSyBpbF-Z3KdsNUkZ6Eg1O2gvZn171lE3xs'); // Truncated for security
+  static const String _apiKey = String.fromEnvironment('GOOGLE_API_KEY', defaultValue: ''); // Add your API key here
   static String get apiKey => _apiKey;
   static const String _baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
   
